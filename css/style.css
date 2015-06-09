@@ -1,0 +1,179 @@
+/***************************
+****************************
+Styling for the Autocomplete
+****************************
+***************************/
+.autocomplete-suggestions { border: 1px solid #999; background: #fff; cursor: default; overflow: auto; }
+.autocomplete-suggestion { padding: 5px 5px; font-size: 1.0em; white-space: nowrap; overflow: hidden; }
+.autocomplete-selected { background: #B8DBFF; }
+.autocomplete-suggestions strong { font-weight: normal; color: #3399ff; }
+
+/***************************
+****************************
+Adds the styling for the setting icon in the header
+****************************
+***************************/
+
+#settings {float: left; margin-left: 0.7em;}
+#container{float: left; margin-left: 0.7em;}
+
+.ion-gear-b {float: right; margin-right: 0.7em; cursor: pointer;}
+
+.legend  {float: left;  margin-right: 0.7em}
+.stockInput  {float: right; margin-right: 0.7em}
+.ticker-btn  {float: right; margin-right: 0.7em}
+.zoomIndicator {
+           float: left; 
+           margin-right: 0.7em;
+		   }
+		   
+.zoomTime {float: left; 
+           margin-right: 0.7em;
+		   color: blue; 
+	       cursor: pointer; 
+	       text-decoration: underline;
+		   }
+#chart {margin-top: 3.7em;}
+	
+#settings {
+	border: 1px solid black;
+	height: 190px;
+	width: 350px;
+	position: absolute;
+	top: 105px;
+	left: 70px;
+}
+
+#lblText {
+	position: absolute;
+	top: 10px;
+	left: 25px;
+	height: 20px;
+	width: 100px;
+}
+#inpText {
+	position: absolute;
+	top: 8px;
+	left: 95px;
+	height: 25px;
+	width: 50px;
+}
+
+#lblTextColor {
+	position: absolute;
+	top: 10px;
+	left: 175px;
+	height: 20px;
+	width: 105px;
+}
+#inpTextColor {
+	position: absolute;
+	top: 10px;
+	left: 255px;
+	height: 20px;
+	width: 65px;
+}
+
+#lblTop {
+	position: absolute;
+	top: 103px;
+	left: 37px;
+	height: 20px;
+	width: 40px;
+}
+
+#inpColorScheme1 {
+	position: absolute;
+	top: 103px;
+	left: 90px;
+	height: 20px;
+	width: 65px;
+}
+
+#lblBack {
+	position: absolute;
+	top: 103px;
+	left: 157px;
+	height: 20px;
+	width: 40px;
+}
+
+#inpColorScheme2 {
+	position: absolute;
+	top: 103px;
+	left: 210px;
+	height: 20px;
+	width: 65px;
+}
+
+#lblBars {
+	position: absolute;
+	top: 128px;
+	left: 37px;
+	height: 20px;
+	width: 40px;
+}
+
+#inpColorScheme3 {
+	position: absolute;
+	top: 128px;
+	left: 90px;
+	height: 20px;
+	width: 65px;
+}
+
+#lblArea {
+	position: absolute;
+	top: 128px;
+	left: 157px;
+	height: 20px;
+	width: 40px;
+}
+
+#inpColorScheme4 {
+	position: absolute;
+	top: 128px;
+	left: 210px;
+	height: 20px;
+	width: 65px;
+}
+
+#lblZoom {
+	position: absolute;
+	top: 153px;
+	left: 37px;
+	height: 20px;
+	width: 40px;
+}
+
+#inpColorScheme5 {
+	position: absolute;
+	top: 153px;
+	left: 90px;
+	height: 20px;
+	width: 65px;
+}
+
+#lblStroke {
+	position: absolute;
+	top: 153px;
+	left: 157px;
+	height: 20px;
+	width: 40px;
+}
+
+#inpColorScheme6 {
+	position: absolute;
+	top: 153px;
+	left: 210px;
+	height: 20px;
+	width: 65px;
+}
+
+#lblColor {
+	position: absolute;
+	top: 53px;
+	left: 125px;
+	height: 20px;
+	width: 100px;
+}
