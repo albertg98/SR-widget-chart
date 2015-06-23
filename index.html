@@ -3,25 +3,69 @@
 	<title>Stockrender-Chart-App</title>
 	<meta charset="utf-8">
 	<!-- CSS -->
+		<!-- Bower -->
+			<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+		<!-- Bower -->
 		<link rel="stylesheet" type="text/css" href="css/main.css">
+		<link rel="stylesheet" type="text/css" href="css/plot.css">
 	<!-- CSS -->
 	<!-- Framework -->
 		<script src="vendors/stockrender-apprender-launch.js"></script>
 	<!-- Framework -->
 	<!-- Bower -->
-		<script type="text/javascript" src="bower_components/d3/d3.min.js"></script>
+		<script type="text/javascript" src="bower_components/d3/d3.js"></script>
+		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="bower_components/techan/dist/techan.min.js"></script>
 		<script type="text/javascript" src="bower_components/async/lib/async.js"></script>
 	<!-- Bower -->
 	<!-- JS -->
 		<script type="text/javascript" src="js/memory.js"></script>
+		<script type="text/javascript" src="js/alert.js"></script>
 		<script type="text/javascript" src="js/data.js"></script>
 		<script type="text/javascript" src="js/chart.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
 	<!-- JS -->
 </head>
 <body>
+	<!-- <nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="col-lg-6">
+				<div class="input-group">
+					<input type="text" class="form-control" placeholder="Ticker/Stock Name">
+					<span class="input-group-btn">
+						<button class="btn btn-default " type="button"><span class="glyphicon glyphicon-play"></span>.</button>
+					</span>
+				</div>
+			</div>
+		</div>
+	</nav> -->
+	<!-- <button type="button" class="btn btn-info" data-toggle="modal" data-target="#settings">
+		<i class="glyphicon glyphicon-cog"></i>
+	</button> -->
+	<div class="alert alert-success popup-msg" role="alert">
+		<a href="#" class="alert-link"></a>
+	</div>
+	<div class="alert alert-danger popup-msg" role="alert">
+		<a href="#" class="alert-link"></a>
+	</div>
 	<div id="chart">
+	</div>
+	<div class="modal fade" id="settings" tabindex="-1" role="dialog" aria-labelledby="settingsLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="settingsLabel">Modal title</h4>
+				</div>
+				<div class="modal-body">
+					...
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+					<button type="button" class="btn btn-primary">Save changes</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </body>
 </html>

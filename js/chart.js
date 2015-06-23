@@ -1,63 +1,157 @@
-function Chart (cntId) {
-	/*Define Globals*/
-	var margin,width,height,x,y,candlestick,yAxis,xAxis,svg,data,
-		zoom = d3.behavior.zoom()
-			.on("zoom", redraw);
+function Chart (cntid) {
+
+	var self = this;
+
+	var margin, margin2, width, height, height2;
 	/**
-	 * Sets the margin based on screen size
+	 * Set Margins based on page height
+	 * @param {Object} dim dimesions of plot
 	 */
-	this.setMargins = function () {
-		margin = {top: 20, right: 20, bottom: 30, left: 50},
-			width = 0.99 * window.innerWidth - margin.left - margin.right,
-			height = 0.9 * window.innerHeight - margin.top - margin.bottom;
+	this.setMargins = function (dim) {
+		margin = {top: 20, right: 20, bottom: 100, left: 50},
+		width = dim.width  - margin.left - margin.right,
+		height = dim.height  - margin.top - margin.bottom,
+		margin2 = {top: height+margin.top, right: 20, bottom: 20, left: 50},
+		height2 = dim.height - margin2.top - margin2.bottom;
 	}
+
+	var x, x2, y, y2, yVolume;
+
 	/**
-	 * Sets the axis
+	 * Set the range of the plot
+	 * @param {Object} dim dimesions of plot
 	 */
-	this.setAxis = function(){
-		/*set scales*/
+	this.setRange = function (dim) {
+		this.setMargins(dim);
 		x = techan.scale.financetime()
-			.range([0, width]),
+			.range([0, width]);
+
+		x2 = techan.scale.financetime()
+				.range([0, width]);
+
 		y = d3.scale.linear()
-			.range([height, 0]),
-		/*set type*/
+				.range([height, 0]);
+
+		yVolume = d3.scale.linear()
+				.range([y(0), y(0.3)]);
+
+		y2 = d3.scale.linear()
+				.range([height2, 0]);
+	}
+
+	/*Set zoom*/
+	var brush = d3.svg.brush()
+			.on("brushend", draw);
+
+	var candlestick, volume, close, accessor;
+	/**
+	 * set the seriese
+	 * @param {Object} dim dimesions of plot
+	 */
+	this.setSeries = function (dim) {
+		this.setRange(dim)
 		candlestick = techan.plot.candlestick()
 			.xScale(x)
-			.yScale(y),
-		/*build svg*/
+			.yScale(y);
+
+		volume = techan.plot.volume()
+			.xScale(x)
+			.yScale(yVolume);
+
+		close = techan.plot.close()
+			.xScale(x2)
+			.yScale(y2);
+		accessor = candlestick.accessor();
+	}
+
+	var xAxis, xAxis2, yAxis, yAxis2;
+	/**
+	 * set the axis
+	 * @param {Object} dim dimesions of plot
+	 */
+	this.setAxis = function(dim){
+		this.setSeries(dim);
 		xAxis = d3.svg.axis()
 			.scale(x)
-			.orient("bottom"),
+			.orient("bottom");
+
+		xAxis2 = d3.svg.axis()
+			.scale(x2)
+			.orient("bottom");
+
 		yAxis = d3.svg.axis()
 			.scale(y)
 			.orient("left");
-	}
-	/**
-	 * Create an SVG
-	 */
-	this.svg = function()	{
-		svg = d3.select(cntId).append("svg")
-			.attr("width", width + margin.left + margin.right)
-			.attr("height", height + margin.top + margin.bottom)
-			.append("g")
-			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-		svg.append("clipPath")
-				.attr("id", "clip")
-			.append("rect")
-				.attr("x", 0)
-				.attr("y", y(1))
-				.attr("width", width)
-				.attr("height", y(0) - y(1));
 
-		svg.append("g")
+		yAxis2 = d3.svg.axis()
+			.scale(y2)
+			.ticks(0)
+			.orient("left");
+	}
+
+	var ohlcAnnotation, timeAnnotation, crosshair;
+	this.setAnnotation = function () {
+		ohlcAnnotation = techan.plot.axisannotation()
+			.axis(yAxis)
+			.format(d3.format('$,.2fs'));
+
+		timeAnnotation = techan.plot.axisannotation()
+			.axis(xAxis)
+			.format(function (time) {
+				return d3.time.format('%Y-%m-%d')(new Date(time));
+			})
+			.width(65)
+			.translate([0, height]);
+
+		crosshair = techan.plot.crosshair()
+			.xScale(x)
+			.yScale(y)
+			.xAnnotation(timeAnnotation)
+			.yAnnotation(ohlcAnnotation);
+	}
+
+	var svg, focus;
+	this.setSVG = function () {
+		svg = d3.select(cntid).append("svg")
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom);
+
+		focus = svg.append("g")
+			.attr("class", "focus")
+			.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	}
+
+	/**
+	 * draws the focus
+	 * @param {Object} dim dimesions of plot
+	 */
+	this.drawFocus = function (dim) {
+		/*Create Req*/
+		this.setAxis(dim);
+		this.setAnnotation();
+		this.setSVG();
+		
+		focus.append("clipPath")
+			.attr("id", "clip")
+		.append("rect")
+			.attr("x", 0)
+			.attr("y", y(1))
+			.attr("width", width)
+			.attr("height", y(0) - y(1));
+
+		focus.append("g")
+				.attr("class", "volume")
+				.attr("clip-path", "url(#clip)");
+
+		focus.append("g")
 				.attr("class", "candlestick")
 				.attr("clip-path", "url(#clip)");
 
-		svg.append("g")
+		focus.append("g")
 				.attr("class", "x axis")
 				.attr("transform", "translate(0," + height + ")");
 
-		svg.append("g")
+		focus.append("g")
 				.attr("class", "y axis")
 			.append("text")
 				.attr("transform", "rotate(-90)")
@@ -66,53 +160,85 @@ function Chart (cntId) {
 				.style("text-anchor", "end")
 				.text("Price ($)");
 
-		svg.append("rect")
-				.attr("class", "pane")
-				.attr("width", width)
-				.attr("height", height)
-				.call(zoom);
+		focus.append('g')
+				.attr("class", "crosshair")
+				.call(crosshair);
 	}
+
+	var context;
+	this.setContext = function() {
+		context = svg.append("g")
+			.attr("class", "context")
+			.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+	}
+
+	this.drawContext = function () {
+		this.setContext();
+		context.append("g")
+			.attr("class", "close");
+
+		context.append("g")
+				.attr("class", "pane");
+
+		context.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + height2 + ")");
+
+		context.append("g")
+				.attr("class", "y axis")
+				.call(yAxis2);
+	}
+
 	/**
-	 * Draw the graph
-	 * @param  {Object} ndata new data
-	 * @return {}       
+	 * Initilize plot
+	 * @param {Object} dim dimesions of plot
+	 * @return {Promise}    
 	 */
-	this.draw = function(ndata)	{
-		/*update data if needed*/
+	function init(dim) {
+		$(cntid).html('');
+		return new Promise(function(res, rej){
+			self.drawFocus(dim);
+			self.drawContext();
+			res(null);
+		});
+	}
+	var zoomable, zoomable2, data, dim;
+	this.draw = function (dim, ndata) {
+		dim = dim || {height: window.innerHeight, width: window.innerWidth};
 		data = ndata || data;
-		/*clear container*/
-		$(cntId).html('');
-	
-		/*set the stage for plot*/
-		this.setMargins();
-		this.setAxis();
-		this.svg();
-
-		/*add data*/
-		var accessor = candlestick.accessor();
+		init(dim).then(function () {
 			x.domain(data.map(accessor.d));
+			x2.domain(x.domain());
 			y.domain(techan.scale.plot.ohlc(data, accessor).domain());
-			svg.select("g.candlestick").datum(data);
+			y2.domain(y.domain());
+			yVolume.domain(techan.scale.plot.volume(data).domain());
 
-		/*draw first plot*/
-		redraw();
+			focus.select("g.candlestick").datum(data);
+			focus.select("g.volume").datum(data);
 
-		/*set zoom*/
-		zoom.x(x.zoomable().clamp(false)).y(y);
+			context.select("g.close").datum(data).call(close);
+			context.select("g.x.axis").call(xAxis2);
 
-		/*enable resize*/
-		var self = this;
-		window.onresize = function () {
-			self.draw();
-		}
+			zoomable = x.zoomable();
+			zoomable2 = x2.zoomable();
+			brush.x(zoomable2);
+			context.select("g.pane").call(brush).selectAll("rect").attr("height", height2);
+
+			draw();
+
+			window.onresize = function () {
+				self.draw();
+			}
+		});
 	}
-	/**
-	 * redraws partials of the plot
-	 * @return {} 
-	 */
-	function redraw() {
-		svg.select("g.candlestick").call(candlestick);
-		svg.select("g.x.axis").call(xAxis);
-		svg.select("g.y.axis").call(yAxis);
+	function draw() {
+		var candlestickSelection = focus.select("g.candlestick"),
+			data = candlestickSelection.datum();
+		zoomable.domain(brush.empty() ? zoomable2.domain() : brush.extent());
+		y.domain(techan.scale.plot.ohlc(data.slice.apply(data, zoomable.domain()), candlestick.accessor()).domain());
+		candlestickSelection.call(candlestick);
+		focus.select("g.volume").call(volume);
+		focus.select("g.x.axis").call(xAxis);
+		focus.select("g.y.axis").call(yAxis);
 	}
 }

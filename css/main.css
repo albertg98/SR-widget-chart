@@ -1,34 +1,27 @@
-body {
-        font: 10px sans-serif;
-    }
-
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: #000;
-        shape-rendering: crispEdges;
-    }
-
-    path.candle {
-        stroke: #000000;
-    }
-
-    path.candle.body {
-        stroke-width: 0;
-    }
-
-    path.candle.up {
-        fill: #00AA00;
-        stroke: #00AA00;
-    }
-
-    path.candle.down {
-        fill: #FF0000;
-        stroke: #FF0000;
-    }
-
-    rect.pane {
-        cursor: move;
-        fill: none;
-        pointer-events: all;
-    }
+.desk {
+	padding: 1% 0%;
+}
+.tt-menu {
+	padding: 8px 0px;
+	background-color: #FFF;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+}
+.tt-suggestion {
+	padding: 3px 20px;
+	line-height: 24px;
+}
+.twitter-typeahead {
+	width: 100%;
+	margin-top: 1%;
+}
+.popup-msg {
+	position: absolute;
+	top: 0px;
+	left: 60%;
+	right: 0%;
+	z-index: 9001;
+	text-align: center;
+	transition: all, 0.75s, ease-in-out;
+}

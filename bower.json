@@ -23,6 +23,7 @@
   "dependencies": {
     "d3": "~3.5.5",
     "async": "~1.2.1",
-    "techan": "~0.5.0"
+    "techan": "~0.5.0",
+    "bootstrap": "~3.3.5"
   }
 }
