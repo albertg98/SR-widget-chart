@@ -1,0 +1,31 @@
+{
+  "name": "chart-app",
+  "version": "0.0.0",
+  "homepage": "https://github.com/asosnovsky/stockrender-chart-app",
+  "authors": [
+    "asosnovsky <arielsosnovsky@gmail.com>"
+  ],
+  "description": "stockreder charing application",
+  "main": "index.html",
+  "keywords": [
+    "stockrender",
+    "chart",
+    "d3"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "d3": "~3.5.5",
+    "dimple": "~2.1.2",
+    "flexboxgrid": "~6.2.0",
+    "d3plus": "~1.7.4",
+    "async": "~1.2.1",
+    "techan": "~0.5.0"
+  }
+}

@@ -1,42 +1,27 @@
-<!DOCTYPE html>
 <html>
-	<head>
-		<title>Stockrender-Template App</title>
-
-		<!-- Framework -->
-		<script src="vendors/stockrender-apprender.1.0.0.min.js"></script>
-		<!-- Framework -->
-
-		<!-- Supplementary Code -->
-		<!-- JS -->
-			<script src="js/IndexJS/Runner.js"></script>
-			<script src="js/IndexJS/main.js"></script>
-		<!-- JS -->
-		<!-- CSS -->
-			<link rel="stylesheet" type="text/css" href="css/loading-anim.css">
-			<link rel="stylesheet" type="text/css" href="css/main.css">
-		<!-- CSS -->
-		<!-- Supplementary Code -->
-	</head>
-	<body>
-		<div class="overhead">
-			<div class="spinner"></div>
-			<span> Loading...</span>
-		</div>
-
-		<div class="main">
-			Stock Ticker: <input type="text" id="stock" value="A"><input type="submit" value="Submit" id="ticker-btn">
-		</div>
-
-		<div class="tables">
-			<div id="fundamental-data" class="list">
-				<h1>Earning per Share</h1>
-				<ul></ul>
-			</div>
-			<div id="price-data" class="list">
-				<h1>Price Data</h1>
-				<ul></ul>
-			</div>
-		</div>
-	</body>
+<head>
+	<title>Stockrender-Chart-App</title>
+	<meta charset="utf-8">
+	<!-- CSS -->
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+	<!-- CSS -->
+	<!-- Framework -->
+		<script src="vendors/stockrender-apprender-launch.js"></script>
+	<!-- Framework -->
+	<!-- Bower -->
+		<script type="text/javascript" src="bower_components/d3/d3.min.js"></script>
+		<script type="text/javascript" src="bower_components/techan/dist/techan.min.js"></script>
+		<script type="text/javascript" src="bower_components/async/lib/async.js"></script>
+	<!-- Bower -->
+	<!-- JS -->
+		<script type="text/javascript" src="js/memory.js"></script>
+		<script type="text/javascript" src="js/data.js"></script>
+		<script type="text/javascript" src="js/chart.js"></script>
+		<script type="text/javascript" src="js/main.js"></script>
+	<!-- JS -->
+</head>
+<body>
+	<div id="chart">
+	</div>
+</body>
 </html>

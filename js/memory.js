@@ -1,0 +1,1 @@
+var appmemory = SR.AppMemory(SR.AppID, SR.UserID);
