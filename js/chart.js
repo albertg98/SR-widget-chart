@@ -203,34 +203,18 @@ function Chart (cntid) {
 		});
 	}
 	var zoomable, zoomable2, data, dim;
+	/**
+	 * Main drawing function
+	 * @param  {Object} dim   dimesions of plot
+	 * @param  {Object} ndata new data to replace old
+	 * @return {Promise}       
+	 */
 	this.draw = function (dim, ndata) {
 		dim = dim || {height: window.innerHeight, width: window.innerWidth};
 		data = ndata || data;
-		init(dim).then(function () {
-			x.domain(data.map(accessor.d));
-			x2.domain(x.domain());
-			y.domain(techan.scale.plot.ohlc(data, accessor).domain());
-			y2.domain(y.domain());
-			yVolume.domain(techan.scale.plot.volume(data).domain());
-
-			focus.select("g.candlestick").datum(data);
-			focus.select("g.volume").datum(data);
-
-			context.select("g.close").datum(data).call(close);
-			context.select("g.x.axis").call(xAxis2);
-
-			zoomable = x.zoomable();
-			zoomable2 = x2.zoomable();
-			brush.x(zoomable2);
-			context.select("g.pane").call(brush).selectAll("rect").attr("height", height2);
-
-			draw();
-
-			window.onresize = function () {
-				self.draw();
-			}
-		});
+		return init(dim).then(plot);
 	}
+	/** Draws plot with current data **/
 	function draw() {
 		var candlestickSelection = focus.select("g.candlestick"),
 			data = candlestickSelection.datum();
@@ -240,5 +224,66 @@ function Chart (cntid) {
 		focus.select("g.volume").call(volume);
 		focus.select("g.x.axis").call(xAxis);
 		focus.select("g.y.axis").call(yAxis);
+		if(topt) {
+			if(topt.sizemod) {topt.options.size = topt.sizemod*width};
+			self.title(topt.title, topt.options);
+		}
+	}
+	/** Draws and Maps data to plot **/
+	function plot () {
+		x.domain(data.map(accessor.d));
+		x2.domain(x.domain());
+		y.domain(techan.scale.plot.ohlc(data, accessor).domain());
+		y2.domain(y.domain());
+		yVolume.domain(techan.scale.plot.volume(data).domain());
+
+		focus.select("g.candlestick").datum(data);
+		focus.select("g.volume").datum(data);
+
+		context.select("g.close").datum(data).call(close);
+		context.select("g.x.axis").call(xAxis2);
+
+		zoomable = x.zoomable();
+		zoomable2 = x2.zoomable();
+		brush.x(zoomable2);
+		context.select("g.pane").call(brush).selectAll("rect").attr("height", height2);
+
+		draw();
+
+		window.onresize = function () {
+			self.draw();
+		}
+		return self;
+	}
+	/**
+	 * Redraws a new plot with the same dimension but new data
+	 * @param  {Object} ndata new data
+	 * @return {Promise}       
+	 */
+	this.redraw = function (ndata) {
+		return this.draw(dim, ndata);
+	}
+
+	var topt;
+	/**
+	 * adds a title
+	 * @param  {String} title   
+	 * @param  {Object} options
+	 */
+	this.title = function (title, options) {
+		options = options || {};
+		if(title) {
+			if(!options.size) options.size = 0.05*width;
+				topt = {title:title, options:options};
+			if(options.sizemod) { topt.sizemod = (options.size/width) };
+			$('#ticker-text').html('');
+			svg.append("text")
+				.attr("id", "ticker-text")
+				.attr("x", options.x || (width / 2))             
+				.attr("y", options.y || (4/3)*parseInt(options.size))
+				.attr("text-anchor", "middle")  
+				.style("font-size",  parseInt(options.size)+"px") 
+				.text(title);
+		};
 	}
 }

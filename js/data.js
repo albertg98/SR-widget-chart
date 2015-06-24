@@ -1,3 +1,10 @@
+/**
+ * Gets data from the API
+ * @param  {Stirng} ticker 
+ * @param  {Date/Number/String} from   
+ * @param  {Date/Number/String} to     
+ * @return {Promise}        
+ */
 function getData (ticker, from, to) {
 	return new Promise(function (res, rej) {
 		if(!getData[ticker])	{
@@ -16,12 +23,47 @@ function getData (ticker, from, to) {
 					});
 					if(sData.length === data.response.data.length){
 						getData[ticker] = sData;
-						res(sData);
+						res({
+							name  : data.response.stock_name,
+							ticker: data.response.ticker,
+							data  : sData
+						});
 					}
 				});
 			});
 		}	else	{
 			res(getData[ticker]);
 		}
+	});
+}
+
+/**
+ * Get Data and plot
+ * @param  {String} ticker    
+ * @param  {Chart} mainChart 
+ * @param  {Date/Number/String} from   
+ * @param  {Date/Number/String} to     
+ * @return {Promise} 
+ */
+function getANDplot (ticker, mainChart, from, to) {
+	from = getANDplot.from || from;
+	to = getANDplot.to || to;
+	mainChart = getANDplot.mainChart || mainChart;
+	return new Promise(function(res, rej){
+		$('.loading').css({width:'100%',opacity:1});
+		getData(ticker,from,to).then(function(data){
+			getANDplot.from = from;
+			getANDplot.to = to;
+			getANDplot.mainChart = mainChart;
+			mainChart.draw({
+				height: window.innerHeight, 
+				width: window.innerWidth
+			}, data.data).then(function (chart) {
+				$('#ticker').val(data.ticker + '/' + (data.name?data.name:data.ticker));
+				chart.title((data.name?data.name:data.ticker), {size:20, sizemod:true});
+				$('.loading').css({width:'0%',opacity:0})
+				res();
+			},rej);
+		},rej);
 	});
 }

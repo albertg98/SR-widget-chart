@@ -1,5 +1,6 @@
-.desk {
-	padding: 1% 0%;
+.input-group-btn:last-child > .btn, .input-group-btn:last-child > .btn-group {
+	padding-bottom: 15%;
+	margin-bottom: -5%;
 }
 .tt-menu {
 	padding: 8px 0px;
@@ -24,4 +25,20 @@
 	z-index: 9001;
 	text-align: center;
 	transition: all, 0.75s, ease-in-out;
+}
+
+.alert-danger {
+	opacity: 0;
+}
+
+.alert-success {
+	opacity: 0;
+}
+
+.input-group {
+	position: absolute !important;
+	left: 0px;
+	right: 0px;
+	transition: all, 0.25s, ease-in-out;
+	opacity: 0;
 }

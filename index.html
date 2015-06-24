@@ -8,6 +8,7 @@
 		<!-- Bower -->
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/plot.css">
+		<link rel="stylesheet" type="text/css" href="css/loading-anim.css">
 	<!-- CSS -->
 	<!-- Framework -->
 		<script src="vendors/stockrender-apprender-launch.js"></script>
@@ -17,36 +18,30 @@
 		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="bower_components/techan/dist/techan.min.js"></script>
 		<script type="text/javascript" src="bower_components/async/lib/async.js"></script>
+		<script type="text/javascript" src="bower_components/typeahead.js/dist/typeahead.bundle.js"></script>
 	<!-- Bower -->
 	<!-- JS -->
 		<script type="text/javascript" src="js/memory.js"></script>
-		<script type="text/javascript" src="js/alert.js"></script>
 		<script type="text/javascript" src="js/data.js"></script>
 		<script type="text/javascript" src="js/chart.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
 	<!-- JS -->
 </head>
 <body>
-	<!-- <nav class="navbar navbar-default navbar-fixed-top">
-		<div class="container">
-			<div class="col-lg-6">
-				<div class="input-group">
-					<input type="text" class="form-control" placeholder="Ticker/Stock Name">
-					<span class="input-group-btn">
-						<button class="btn btn-default " type="button"><span class="glyphicon glyphicon-play"></span>.</button>
-					</span>
-				</div>
-			</div>
+	<div class="overhead loading">
+			<div class="spinner"></div>
+			<span> Loading...</span>
 		</div>
-	</nav> -->
-	<!-- <button type="button" class="btn btn-info" data-toggle="modal" data-target="#settings">
-		<i class="glyphicon glyphicon-cog"></i>
-	</button> -->
-	<div class="alert alert-success popup-msg" role="alert">
-		<a href="#" class="alert-link"></a>
-	</div>
-	<div class="alert alert-danger popup-msg" role="alert">
-		<a href="#" class="alert-link"></a>
+	<div class="col-lg-6 col-lg-offset-3 col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3">
+		<div class="input-group">
+			<input type="text" class="form-control" placeholder="Ticker/Stock Name" id="ticker">
+			<span class="input-group-btn">
+				<button class="btn btn-default" type="button" id="ticker-change"><i class="glyphicon glyphicon-play"></i></button>
+				<button type="button" class="btn btn-info" data-toggle="modal" data-target="#settings">
+				<i class="glyphicon glyphicon-cog"></i>
+				</button>
+			</span>
+		</div>
 	</div>
 	<div id="chart">
 	</div>
