@@ -16,6 +16,15 @@ $(document).ready(function () {
     		$('#ticker-change')[0].onclick();
     	}
 	});
+	$('#addind')[0].onclick = function()	{
+
+		addInd (/strong>(.*?)<\/strong/i.exec($("#select-type .selected-label").html())[1],
+			Number($("#periods").val()),
+			'',
+			getRandomColor()
+			);
+			
+	}
 	/*Load typehead*/
 	SR.AppData.v1.Tickerlist.GET('j').then(function (tickerlist) {
 		var tickers = new Bloodhound({
@@ -44,9 +53,17 @@ $(document).ready(function () {
 		});
 	});
 	/*Load first plot*/
-	appmemory.load('ticker').then(function (ticker) {
-		getANDplot(ticker, mainChart, "2012-01-01", "2015-01-01").then(function(){});
-	}).then(function(){
-		$('.loading').css({width:'0%',opacity:0})
+	appmemory.load('indlist').then(function(indlist){
+		appmemory.load('ticker').then(function (ticker) {
+			indList = indlist;
+			getANDplot(ticker, mainChart, "2012-01-01", "2015-01-01").then(function(){
+				async.each(indlist, function(ind){
+					mainChart.addMA(ind.period, ind.color, ind.type);
+					alertCtrl(ind.type, ind.period, ind.price, ind.color);
+				});
+			});
+		}).then(function(){
+			$('.loading').css({width:'0%',opacity:0})
+		});
 	});
 });

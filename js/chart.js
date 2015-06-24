@@ -307,7 +307,9 @@ function Chart (cntid) {
 		col = col || 'green';
 		type = type || 'sma';
 		var id = type + '-' + n + '-' + col;
+		console.log('MA-add', n, col, type);
 		if(!(indtrs.fcn[id]&&indtrs.memo[id])&&($.inArray(type,['sma','ema'])>=0))	{
+			console.log('MA-add', n, col, type);
 			var tma = techan.plot[type]()
 				.xScale(x2)
 				.yScale(y);
@@ -322,9 +324,10 @@ function Chart (cntid) {
 				svg.select("g." + type + ".ma-0").call(tma.refresh);
 			};
 			indtrs.memo[id] = function() {
-				self.addSMA(n, col);
+				self.addMA(n, col);
 			};
 		}
+		console.log(indtrs);
 		return id;
 	};
 
@@ -333,11 +336,14 @@ function Chart (cntid) {
 	 * @param  {String} id
 	 */
 	this.clearInd = function(id)	{
+		console.log('deleting...',id);
 		if(id === '*') {
 			indtrs = {memo:{},fcn:{}};
 			this.redraw();
 		}	else	{
+			console.log('deleting...',id);
 			try{
+				console.log('deleting...',id);
 				delete indtrs.memo[id];
 				delete indtrs.fcn[id];
 				this.redraw();

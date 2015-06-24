@@ -67,11 +67,18 @@ function getANDplot (ticker, mainChart, from, to) {
 				chart.title((data.name?data.name:data.ticker), {size:20, sizemod:true});
 				$('.loading').css({width:'0%',opacity:0});
 				$('.ticker-input').css({opacity: 0});
-				res();
+				return data.ticker;
 			},function(reason){
 				console.log(reason);
 				$('.loading').css({width:'0%',opacity:0});
 				$('.ticker-input').css({opacity: 0});
+			}).then(function(ticker){
+				res();
+				appmemory.save('ticker', ticker).then(function(){
+					console.log('updated ticker!');
+				}, function(){
+					console.warn('failed to update!');
+				})
 			});
 		},function(reason){
 			console.log(reason);

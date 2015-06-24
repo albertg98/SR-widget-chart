@@ -18,12 +18,14 @@
 		<script type="text/javascript" src="bower_components/d3/d3.js"></script>
 		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
 		<script type="text/javascript" src="bower_components/fuelux/dist/js/fuelux.js"></script>
-		<script type="text/javascript" src="bower_components/techan/dist/techan.min.js"></script>
+		<script type="text/javascript" src="bower_components/techan/dist/techan.js"></script>
+		<script type="text/javascript" src="bower_components/techan/dist/techan.js.map"></script>
 		<script type="text/javascript" src="bower_components/async/lib/async.js"></script>
 		<script type="text/javascript" src="bower_components/typeahead.js/dist/typeahead.bundle.js"></script>
 	<!-- Bower -->
 	<!-- JS -->
 		<script type="text/javascript" src="js/memory.js"></script>
+		<script type="text/javascript" src="js/randomcolor.js"></script>
 		<script type="text/javascript" src="js/data.js"></script>
 		<script type="text/javascript" src="js/chart.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
@@ -56,16 +58,14 @@
 				</div>
 				<div class="modal-body">
 					<div class="row container">
-						<form class="form-horizontal col-xs-4 col-sm-4 col-md-4 col-lg-4">
-							<fieldset>
-								<!-- Form Name -->
+						<fieldset class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
 								<legend>Indicator Add</legend>
 
 								<!-- Select Basic -->
 								<div class="control-group">
 									<label class="control-label" for="selectbasic">Select Type</label>
 									<div class="controls">
-										<div class="btn-group selectlist" data-resize="auto" data-initialize="selectlist" id="selectbasic">
+										<div class="btn-group selectlist" data-resize="auto" data-initialize="selectlist" id="select-type">
 											<button class="btn btn-default dropdown-toggle " data-toggle="dropdown" type="button">
 												<span class="selected-label">Select Type</span>
 												<span class="caret"></span>
@@ -85,23 +85,16 @@
 									<label class="control-label" for="Period">Period</label>
 									<div class="controls">
 										<div class="spinbox" data-initialize="spinbox">
-											<input class="form-control input-mini spinbox-input" value="15" id="mySpinbox" type="number">
+											<input class="form-control input-mini spinbox-input" value="15" id="periods" type="number">
 											<span class="help-block">Number of periods</span>
 										</div>
 									</div>
 								</div>
-
-								<!-- Button -->
-								<div class="control-group">
-									<div class="controls">
-										<button id="singlebutton" name="singlebutton" class="btn btn-primary">Add</button>
-									</div>
-								</div>
+								<button id="addind" name="singlebutton" class="btn btn-primary">Add</button>
 							</fieldset>
-						</form>
 					</div>
 					<div class="row container">
-						<div class="well" id="ind-cnt"></div>
+						<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 well" id="ind-cnt"></div>
 					</div>	
 				</div>
 				<div class="modal-footer">
