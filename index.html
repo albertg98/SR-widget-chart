@@ -4,7 +4,8 @@
 	<meta charset="utf-8">
 	<!-- CSS -->
 		<!-- Bower -->
-			<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+			<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
+			<link rel="stylesheet" type="text/css" href="bower_components/fuelux/dist/css/fuelux.css">
 		<!-- Bower -->
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/plot.css">
@@ -15,7 +16,8 @@
 	<!-- Framework -->
 	<!-- Bower -->
 		<script type="text/javascript" src="bower_components/d3/d3.js"></script>
-		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+		<script type="text/javascript" src="bower_components/fuelux/dist/js/fuelux.js"></script>
 		<script type="text/javascript" src="bower_components/techan/dist/techan.min.js"></script>
 		<script type="text/javascript" src="bower_components/async/lib/async.js"></script>
 		<script type="text/javascript" src="bower_components/typeahead.js/dist/typeahead.bundle.js"></script>
@@ -29,15 +31,15 @@
 </head>
 <body>
 	<div class="overhead loading">
-			<div class="spinner"></div>
-			<span> Loading...</span>
-		</div>
-	<div class="col-lg-6 col-lg-offset-3 col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3">
-		<div class="input-group">
+		<div class="spinner"></div>
+		<span> Loading...</span>
+	</div>
+	<div class="col-lg-6 col-lg-offset-3 col-xs-6 col-xs-offset-3 col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3">
+		<div class="input-group ticker-input">
 			<input type="text" class="form-control" placeholder="Ticker/Stock Name" id="ticker">
 			<span class="input-group-btn">
 				<button class="btn btn-default" type="button" id="ticker-change"><i class="glyphicon glyphicon-play"></i></button>
-				<button type="button" class="btn btn-info" data-toggle="modal" data-target="#settings">
+				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#settings">
 				<i class="glyphicon glyphicon-cog"></i>
 				</button>
 			</span>
@@ -50,14 +52,60 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-					<h4 class="modal-title" id="settingsLabel">Modal title</h4>
+					<h2 class="modal-title" id="settingsLabel"><i class="glyphicon glyphicon-tasks"></i> Chart Settings</h2>
 				</div>
 				<div class="modal-body">
-					...
+					<div class="row container">
+						<form class="form-horizontal col-xs-4 col-sm-4 col-md-4 col-lg-4">
+							<fieldset>
+								<!-- Form Name -->
+								<legend>Indicator Add</legend>
+
+								<!-- Select Basic -->
+								<div class="control-group">
+									<label class="control-label" for="selectbasic">Select Type</label>
+									<div class="controls">
+										<div class="btn-group selectlist" data-resize="auto" data-initialize="selectlist" id="selectbasic">
+											<button class="btn btn-default dropdown-toggle " data-toggle="dropdown" type="button">
+												<span class="selected-label">Select Type</span>
+												<span class="caret"></span>
+												<span class="sr-only">Toggle Dropdown</span>
+											</button>
+											<ul class="dropdown-menu" role="menu">
+												<li data-value="Option one"><a href="#"><strong>SMA</strong> - Simple Moving Average</a></li>
+												<li data-value="Option two"><a href="#"><strong>EMA</strong> - Exponential Moving Average</a></li>
+											</ul>
+											<input class="hidden hidden-field" name="selectbasic" readonly="readonly" aria-hidden="true" type="text">
+										</div>
+									</div>
+								</div>
+
+								<!-- Spinbox -->
+								<div class="control-group ">
+									<label class="control-label" for="Period">Period</label>
+									<div class="controls">
+										<div class="spinbox" data-initialize="spinbox">
+											<input class="form-control input-mini spinbox-input" value="15" id="mySpinbox" type="number">
+											<span class="help-block">Number of periods</span>
+										</div>
+									</div>
+								</div>
+
+								<!-- Button -->
+								<div class="control-group">
+									<div class="controls">
+										<button id="singlebutton" name="singlebutton" class="btn btn-primary">Add</button>
+									</div>
+								</div>
+							</fieldset>
+						</form>
+					</div>
+					<div class="row container">
+						<div class="well" id="ind-cnt"></div>
+					</div>	
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-					<button type="button" class="btn btn-primary">Save changes</button>
 				</div>
 			</div>
 		</div>

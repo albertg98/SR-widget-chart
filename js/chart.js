@@ -228,6 +228,7 @@ function Chart (cntid) {
 			if(topt.sizemod) {topt.options.size = topt.sizemod*width};
 			self.title(topt.title, topt.options);
 		}
+		(Object.keys(indtrs.fcn).length>0)&&(async.each(Object.keys(indtrs.fcn),function(key){indtrs.fcn[key]()}));
 	}
 	/** Draws and Maps data to plot **/
 	function plot () {
@@ -252,6 +253,12 @@ function Chart (cntid) {
 
 		window.onresize = function () {
 			self.draw();
+			if(Object.keys(indtrs.memo).length>0){
+				indtrs.fcn = {};
+				async.each(Object.keys(indtrs.memo), function(key){
+					indtrs.memo[key]();
+				});
+			}
 		}
 		return self;
 	}
@@ -263,7 +270,6 @@ function Chart (cntid) {
 	this.redraw = function (ndata) {
 		return this.draw(dim, ndata);
 	}
-
 	var topt;
 	/**
 	 * adds a title
@@ -286,4 +292,59 @@ function Chart (cntid) {
 				.text(title);
 		};
 	}
+	//-----------------------------------------
+	//	Indicators
+	//-----------------------------------------
+	var indtrs = {memo:{},fcn:{}};
+	/**
+	 * Add Moving Avergae
+	 * @param  {Number} n periods
+	 * @param {Color} col 
+	 * @return {String} the id of the SMA plot
+	 */
+	this.addMA = function(n, col, type)	{
+		n = n || 10;
+		col = col || 'green';
+		type = type || 'sma';
+		var id = type + '-' + n + '-' + col;
+		if(!(indtrs.fcn[id]&&indtrs.memo[id])&&($.inArray(type,['sma','ema'])>=0))	{
+			var tma = techan.plot[type]()
+				.xScale(x2)
+				.yScale(y);
+			var g = svg.append("g")
+				.attr("class", "indicator " + type + " ma-0")
+				.attr("clip-path", "url(#clip)");
+			g.datum(techan.indicator[type]()
+				.period(n)(data)).call(tma);
+			g.select('path')
+				.style('stroke',col);
+			indtrs.fcn[id] = function(){
+				svg.select("g." + type + ".ma-0").call(tma.refresh);
+			};
+			indtrs.memo[id] = function() {
+				self.addSMA(n, col);
+			};
+		}
+		return id;
+	};
+
+	/**
+	 * Clears indicators
+	 * @param  {String} id
+	 */
+	this.clearInd = function(id)	{
+		if(id === '*') {
+			indtrs = {memo:{},fcn:{}};
+			this.redraw();
+		}	else	{
+			try{
+				delete indtrs.memo[id];
+				delete indtrs.fcn[id];
+				this.redraw();
+			}catch(e){
+				console.warn('Tried to delete a non-existing indicator', id);
+			}
+		};
+	};
+
 }
