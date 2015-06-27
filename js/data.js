@@ -87,7 +87,6 @@ function getANDplot (ticker, from, to) {
 			$('.ticker-input').css({opacity: 0});
 		}).then(function(){
 			indList.forEach(function(val){
-				console.log(val.split('-'));
 				addInd.apply(window, val.split('-'));
 			});
 			res();

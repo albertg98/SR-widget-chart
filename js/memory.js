@@ -19,8 +19,8 @@ var indList;
  */
 function inputPush (type, period, price, color)	{
 		price = price || 'close';
-	var html = $('<div class="alert alert-warning alert-dismissible fade in" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span class="alert-x" aria-hidden="true">×</span></button><span class="alert-text"></span></div>');
-		html.css({"background-color": color});
+	var html = $('<div class="alert alert-warning alert-dismissible fade in col-xs-4 col-sm-4 col-md-4 col-lg-4" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span class="alert-x" aria-hidden="true">×</span></button><span class="alert-text"></span></div>');
+		html.css({"background-color": colorLuminance(color)});
 		html.find('span').append($('<strong> ' + type.toUpperCase() + '</strong>'));
 		html.find('span').append($('<i> (' + period + ')</i>'));
 		html.find('.alert-text').append($('<span> - ' + price + '</span>'));

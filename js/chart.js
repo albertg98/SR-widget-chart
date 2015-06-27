@@ -125,7 +125,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					toptions = opt.title;
 				}
 			};
-			toptions.col = toptions.col || opt.stroke;
+			toptions.col = toptions.col || (opt.stroke || null);
 			me.title();
 			/*color*/
 			d3.selectAll('.axis path, .axis line').style('stroke',(opt&&opt.stroke)?opt.stroke:null);
@@ -541,7 +541,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		if(domain.constructor === Function)	{
 			domain = domain();
 		}
-		console.log(ctx.id, domain);
 		scales.forEach(function(scale){
 			ctx.scales.get(scale).domain(domain);
 		});
@@ -609,7 +608,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			data 		= chart.data(),
 			zoomable 	= [scale('x').zoomable(), scale('x2').zoomable()];
 
-			brush.x(zoomable[1]);
+			brush.x(zoomable[1].clamp(false));
 			context.select("g.pane").call(brush).selectAll("rect").attr("height", dim.height2);
 			scale('x').zoomable().domain(brush.empty() ? zoomable[1].domain() : brush.extent());
 			
@@ -644,7 +643,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			.style('stroke',col);
 	});
 	Plots.prototype.init = function(opt) {
-		console.log(opt);
 		var data = this.chart.data(),
 			me 	= this;
 		[
@@ -671,6 +669,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			g = d3.select('.indicators').append("g")
 			.attr("class", "indicator " + type + " ma-0")
 			.attr("clip-path", "url(#clip)");
+
 		g.datum(techan.indicator[type]()
 			.period(period)(ctx.data())).call(tma);
 		g.select('path')
