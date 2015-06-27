@@ -27,6 +27,7 @@
     "typeahead.js": "~0.11.1",
     "bootstrap": "~3.3.5",
     "fuelux": "~3.8.0",
-    "mjolnic-bootstrap-colorpicker": "~2.2.0"
+    "mjolnic-bootstrap-colorpicker": "~2.2.0",
+    "bootstrap-datepicker": "~1.4.0"
   }
 }

@@ -85,7 +85,7 @@ function addInd (type, period, color, price)	{
 	period = Number(period) || 15;
 	color = color || getRandomColor();
 	var id = type + '-' + period + '-' + color + '-' + price;
-	console.log(id);
+	inputPush(type, period, price, color);
 	indList = Object.keys(getANDplot.chart.indicators.add(id, [type, color, period]).refresh().get());
 	return indList;
 }

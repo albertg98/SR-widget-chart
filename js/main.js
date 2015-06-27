@@ -2,6 +2,7 @@ var chart;
 $(document).ready(function () {
 	/*Set Events*/
 	$('.ind-color').colorpicker({color:getRandomColor()});
+	$('.input-daterange').datepicker();
 	$('#ticker')[0].onmouseenter = function () {
 		$('.ticker-input').css({opacity: 1});
 	}

@@ -47,18 +47,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		/*SVG*/
 		var svg, focus, context;
 		
-		var	svg = d3.select(cntid).append("svg")
-			.attr("width", width + margins[0].left + margins[0].right)
-			.attr("height", height + margins[0].top + margins[0].bottom),
-
-			focus = svg.append("g")
-			.attr("class", "focus")
-			.attr("transform", "translate(" + margins[0].left + "," + margins[0].top + ")"), 
-			
-			context = svg.append("g")
-			.attr("class", "context")
-			.attr("transform", "translate(" + margins[1].left + "," + margins[1].top + ")");	
-		
 		/**
 		 * Returns SVGs
 		 * @return {Object} 
@@ -75,6 +63,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		this.crosshairs = new Chart.Crosshairs(this);
 		this.dataMappers = new Chart.DataMappers(this);
 		this.indicators = new Chart.Indicators(this);
+		this.plots = new Chart.Plots(this);
 		
 		/*Data*/
 		var data = data || [];
@@ -95,6 +84,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			this.annotations.del('*').release('pre').release('post').init();
 			this.crosshairs.del('*').release('pre').release('post').init();
 			this.indicators.del('*').release('pre').release('post').init();
+			this.plots.del('*').release('pre').release('post').init();
 			/*data*/
 			data = ndata || data;
 			this.dataMappers.init();
@@ -355,39 +345,44 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			svg = ctx.svg()[loc].append("g")
 				.attr("class", ctx.id);
 
-			if(data) {svg.datum(data)};
+			if(data) {
+				console.log(t);
+				svg.datum(data)
+					.call(t);
+			};
 			
 			if(fcn) {
 				svg = fcn(svg);
 			}
-			return [t, svg, [ctx, type, scales, fcn, loc, data]];				
+			return [t, svg, [ctx, type, scales, fcn, loc]];				
 	})
 
 	Series.prototype.init = function () {
 		/*Set defaults*/
 		var scales 	= this.chart.scales.get,
-			me 		= this;
+			me 		= this,
+			data 	= this.chart.data();
 			[
 				['candlestick',
 					['candlestick', function(){
 						return [scales('x'), scales('y')];
 					}, function(svg){
 						return svg.attr("clip-path", "url(#clip)");
-					}]
+					},false, data]
 				],
 				['volume',
 					['volume', function(){
 						return [scales('x'), scales('y-volume')];
 					}, function(svg){
 						return svg.attr("clip-path", "url(#clip)");
-					}]
+					},false]
 				],
 				['indicators',
 					['close', function(){
 						return [scales('x'), scales('y')];
 					}, function(svg){
 						return svg.attr("clip-path", "url(#clip)");
-					}]
+					},false]
 				],
 				['close',
 					['close', function(){
@@ -469,7 +464,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 				context	= chart.svg().context,
 				dim  	= chart.getDim(),
 				axis 	= chart.axes.get;
-
+			
 			focus.append("g")
 				.attr("class", "x axis")
 				.attr("transform", "translate(0," + dim.dim[1] + ")");
@@ -637,12 +632,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			context	= this.chart.svg().context,
 			series 	= this.chart.series.get,
 			axis 	= this.chart.axes.get;
-
-		focus.select("g.candlestick").datum(data);
-		focus.select("g.volume").datum(data);
-
-		context.select("g.close").datum(data).call(series('close')[0]);
-		context.select("g.x.axis").call(axis('xAxis2'));
 	};
 	DataMappers.prototype.brush = function() {
 		if(!this.__brush)	{
@@ -661,24 +650,52 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			scale  		= chart.scales.get,
 			axis  		= chart.axes.get,
 			brush		= brush,
-			csSel		= focus.select("g.candlestick"),
-			data 		= csSel.datum(),
+			data 		= chart.data(),
 			indicators 	= chart.indicators.refresh,
 			zoomable 	= [scale('x').zoomable(), scale('x2').zoomable()];
-			
+
 			brush.x(zoomable[1]);
 			context.select("g.pane").call(brush).selectAll("rect").attr("height", dim.height2);
 			zoomable[0].domain(brush.empty() ? zoomable[1].domain() : brush.extent());
 			scale('y').domain(techan.scale.plot.ohlc(data.slice.apply(data, zoomable[0].domain()), series('candlestick')[0].accessor()).domain());
-			csSel.call(series('candlestick')[0]);
-			indicators();
-			// focus.select("g.volume").call(series('volume')[0]);
+			
+			chart.plots.refresh();
+
 			focus.select("g.x.axis").call(axis('xAxis'));
+			context.select("g.x.axis").call(axis('xAxis2'));
 			focus.select("g.y.axis").call(axis('yAxis'));
-				
+
+			indicators();	
 	};
 	Chart.DataMappers = DataMappers;
-
+//-----------------------------------------
+//	Plots
+//-----------------------------------------
+	var Plots = Chart.Yo(function(chart, series, data){
+		if(data.constructor === Function){
+			data = data();
+		}
+		return chart.series.get(series)[1].append('g').datum(data)
+			.call(chart.series.get(series)[0]);
+	});
+	Plots.prototype.init = function() {
+		var data = this.chart.data(),
+			me 	= this;
+		[
+			['candlestick', ['candlestick', this.chart.data]],
+			['volume', ['volume', this.chart.data]],
+			['close', ['close', this.chart.data]]
+		].forEach(function(item){
+			me.add.apply(this, item);
+		});
+		this.register('pre', function(){
+			d3.select('.candlestick').html('');
+			d3.select('.volume').html('');
+			d3.select('.close').html('');
+		})
+		return this;
+	};
+	Chart.Plots = Plots;
 //-----------------------------------------
 //	Indicators
 //-----------------------------------------
@@ -687,7 +704,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		color = color || getRandomColor();
 		type = type || 'sma';
 		type = type.toLowerCase();
-		console.log(type, color, period);
 		var tma = techan.plot[type]()
 				.xScale(ctx.scales.get('x'))
 				.yScale(ctx.scales.get('y')),

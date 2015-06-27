@@ -25,29 +25,12 @@ function inputPush (type, period, price, color)	{
 		html.find('span').append($('<i> (' + period + ')</i>'));
 		html.find('.alert-text').append($('<span> - ' + price + '</span>'));
 		html.find('.alert-text').append($('<span> - ' + color + '</span>'));
-		html[0].id = type + '-' + period + '-' + color;
+		html[0].id = type + '-' + period + '-' + color + '-' + price;
 		html.click(function(me){
-			mainChart.clearInd(me.target.parentElement.id);
+			console.log(me.target.parentElement.id);
+			getANDplot.chart.indicators.del(me.target.parentElement.id).refresh();
 		});
 		$('#ind-cnt').append(html);
 }
 
-/**
- * add an indicator to the plot
- * @param {String} type   
- * @param {Number} period 
- * @param {String} price  
- * @param {String} color  
- * @param {Boolean} newind update list?
- */
-// function addInd(type, period, price, color, newind)	{
-// 	(newind)&&(indList.push({type: type, period: period, price: price, color: color}));
-// 	appmemory.save('indlist',indList).then(function(){
-// 		mainChart.addMA(period, color, type);
-// 		inputPush(type, period, price, color);
-// 		console.log('updated indlist!');
-// 	}, function(){
-// 		console.warn('failed to update indlist');
-// 	})
-// }
 
