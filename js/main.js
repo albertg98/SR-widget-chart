@@ -1,33 +1,5 @@
 var chart;
 $(document).ready(function () {
-	/*Set Events*/
-	$('.ind-color').colorpicker({color:getRandomColor()});
-	$('.input-daterange').datepicker();
-	$('#ticker')[0].onmouseenter = function () {
-		$('.ticker-input').css({opacity: 1});
-	}
-	$('#chart')[0].onclick = function () {
-		$('.ticker-input').css({opacity: 0});
-	}
-	$('#ticker-change')[0].onclick = function(){
-		$('.ticker-input').css({opacity: 0});
-		$('#ind-cnt').html('');
-		getANDplot($('#ticker').val().split('/')[0]);
-	}
-	$(document).keypress(function(e) {
-		if(e.which == 13) {
-			$('#ticker-change')[0].onclick();
-		}
-	});
-	$('#addind')[0].onclick = function()	{
-		addInd(
-			/strong>(.*?)<\/strong/i.exec($("#select-type .selected-label").html())[1].toLowerCase(),
-			Number($("#periods").val()),
-			$('.ind-color').colorpicker('getValue'),
-			'close'
-			);
-		$('.ind-color').colorpicker('setValue',getRandomColor());
-	};
 	/*Load typehead*/
 	SR.AppData.v1.Tickerlist.GET('j').then(function (tickerlist) {
 		var tickers = new Bloodhound({
