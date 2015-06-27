@@ -51,7 +51,22 @@ function getANDplot (ticker, from, to) {
 	return new Promise(function(res, rej){
 		$('.loading').css({width:'100%',opacity:1});
 		getData(ticker,from,to).then(function(data){
-			getANDplot.chart.init(data.data, {title:data.name}
+			getANDplot.chart.init(data.data, {
+				background: "white",
+				stroke: null,
+				title: data.name, 
+				xlab: 'Price ($)', 
+				style: 'ohlc',
+				crosshair: {col: 'black'},
+				plots: {
+					volume: {
+						col: '#D4D4E7'
+					},
+					bottom: {
+						col: '#80A0D7'
+					}
+				}
+			}
 				).next(function () {
 				$('#ticker').val(data.ticker + '/' + (data.name?data.name:data.ticker));
 				$('.loading').css({width:'0%',opacity:0});

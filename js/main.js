@@ -11,6 +11,7 @@ $(document).ready(function () {
 	}
 	$('#ticker-change')[0].onclick = function(){
 		$('.ticker-input').css({opacity: 0});
+		$('#ind-cnt').html('');
 		getANDplot($('#ticker').val().split('/')[0]);
 	}
 	$(document).keypress(function(e) {

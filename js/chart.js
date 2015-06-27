@@ -60,7 +60,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		this.series = new Chart.Series(this);
 		this.axes = new Chart.Axes(this);
 		this.annotations = new Chart.Annotations(this);
-		this.crosshairs = new Chart.Crosshairs(this);
 		this.dataMappers = new Chart.DataMappers(this);
 		this.indicators = new Chart.Indicators(this);
 		this.plots = new Chart.Plots(this);
@@ -77,14 +76,14 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		}
 		/*Initilization*/
 		this.init = function(ndata, opt)	{
+			if(!opt || !opt.style)	{opt.style = 'ohlc'};
 			/*Styling*/
 			this.scales.del('*').release('pre').release('post').init();
-			this.series.del('*').release('pre').release('post').init();
+			this.series.del('*').release('pre').release('post').init(opt.style);
 			this.axes.del('*').release('pre').release('post').init((opt&&opt.xlab)?opt.xlab:toptions.xlab);
-			this.annotations.del('*').release('pre').release('post').init();
-			this.crosshairs.del('*').release('pre').release('post').init();
+			this.annotations.del('*').release('pre').release('post').init((opt&&opt.crosshair && opt.crosshair.col)?opt.crosshair.col:null);
 			this.indicators.del('*').release('pre').release('post').init();
-			this.plots.del('*').release('pre').release('post').init();
+			this.plots.del('*').release('pre').release('post').init((opt&&opt.plots)?opt.plots:{});
 			/*data*/
 			data = ndata || data;
 			this.dataMappers.init();
@@ -100,20 +99,22 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			setDim();
 			svg = d3.select(cntid).append("svg")
 				.attr("width", width + margins[0].left + margins[0].right)
-				.attr("height", height + margins[0].top + margins[0].bottom),
+				.attr("height", height + margins[0].top + margins[0].bottom)
+				.style("background",(opt&&opt.background)?opt.background:null),
 			focus = svg.append("g")
 				.attr("class", "focus")
-				.attr("transform", "translate(" + margins[0].left + "," + margins[0].top + ")"), 
+				.attr("transform", "translate(" + margins[0].left + "," + margins[0].top + ")")
+				.style("stroke",(opt&&opt.stroke)?opt.stroke:null), 
 			context = svg.append("g")
 				.attr("class", "context")
-				.attr("transform", "translate(" + margins[1].left + "," + margins[1].top + ")");	
+				.attr("transform", "translate(" + margins[1].left + "," + margins[1].top + ")")
+				.style("stroke",(opt&&opt.stroke)?opt.stroke:null);	
 			/*styling*/
 			data = ndata || data;
 			me.scales.refresh();
 			me.series.refresh();
 			me.axes.refresh();
 			me.annotations.refresh();
-			me.crosshairs.refresh();
 			me.dataMappers.refresh();
 			me.indicators.refresh();
 			/*title*/
@@ -124,7 +125,11 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					toptions = opt.title;
 				}
 			};
+			toptions.col = toptions.col || opt.stroke;
 			me.title();
+			/*color*/
+			d3.selectAll('.axis path, .axis line').style('stroke',(opt&&opt.stroke)?opt.stroke:null);
+			d3.selectAll('text').style('fill',(opt&&opt.stroke)?opt.stroke:null);
 			return this;
 		}
 		
@@ -151,6 +156,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					.attr("y", options.y || (4/3)*parseInt(options.size))
 					.attr("text-anchor", "middle")  
 					.style("font-size",  parseInt(options.size)+"px") 
+					.style("fill",options.col || null)
 					.text(title);
 			};
 		}
@@ -334,60 +340,37 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 	 * @param  {Array|Function} scales  Array of Scales
 	 * @return {Series}                                  
 	 */
-	var Series = Chart.Yo(function(ctx, type, scales, fcn, loc, data){
-		if(scales.constructor === Function)	{
-			scales = scales();
-		}
-		var t = techan.plot[type]()
-					.xScale(scales[0])
-					.yScale(scales[1]),
-			loc = loc || "focus",
-			svg = ctx.svg()[loc].append("g")
-				.attr("class", ctx.id);
+	var Series = Chart.Yo(function(chart, type, scales, loc){
+		var scale 	= chart.scales.get,
+			t = techan.plot[type]()
+					.xScale(scale(scales[0]))
+					.yScale(scale(scales[1])),
+			loc = loc || "focus";
+			chart.svg()[loc].select('.' + chart.id).remove();
+		var svg = chart.svg()[loc].append("g")
+				.attr("class", chart.id)
+				.attr("clip-path", "url(#clip)");
 
-			if(data) {
-				console.log(t);
-				svg.datum(data)
-					.call(t);
-			};
-			
-			if(fcn) {
-				svg = fcn(svg);
-			}
-			return [t, svg, [ctx, type, scales, fcn, loc]];				
+			return [t, svg];				
 	})
 
-	Series.prototype.init = function () {
+	Series.prototype.init = function (style) {
 		/*Set defaults*/
 		var scales 	= this.chart.scales.get,
 			me 		= this,
 			data 	= this.chart.data();
 			[
-				['candlestick',
-					['candlestick', function(){
-						return [scales('x'), scales('y')];
-					}, function(svg){
-						return svg.attr("clip-path", "url(#clip)");
-					},false, data]
+				['main',
+					[style, ['x','y'], false]
 				],
 				['volume',
-					['volume', function(){
-						return [scales('x'), scales('y-volume')];
-					}, function(svg){
-						return svg.attr("clip-path", "url(#clip)");
-					},false]
+					['volume', ['x', 'y-volume'], false]
 				],
 				['indicators',
-					['close', function(){
-						return [scales('x'), scales('y')];
-					}, function(svg){
-						return svg.attr("clip-path", "url(#clip)");
-					},false]
+					['close', ['x', 'y'], false]
 				],
-				['close',
-					['close', function(){
-						return [scales('x2'), scales('y2')];
-					}, false, "context"]
+				['bottom',
+					['close', ['x2', 'y2'], "context"]
 				]
 			].forEach(function(item){
 				me.add.apply(this, item);
@@ -490,94 +473,66 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 //-----------------------------------------
 //	Annotation
 //-----------------------------------------
-	var Annotations = Chart.Yo(function(ctx, axis, format, opt){
-		if(axis.constructor === Function)	{
-			axis = axis();
-		}	
+	var Annotations = Chart.Yo(function(chart, axis, format, opt){	
 		var t = techan.plot.axisannotation()
-					.axis(axis)
+					.axis(chart.axes.get(axis))
 					.format(format);
 		if(opt)	{
-			opt.forEach(function(fcn){
-				t = fcn(t);
-			})
+			t = opt(t) || t;
 		}
 		return t;
 	})
 
-	Annotations.prototype.init = function () {
+	Annotations.prototype.init = function (color) {
 		var me 	 = this,
-			dim  = this.chart.getDim()
-			axis = this.chart.axes.get;
+			dim  = this.chart.getDim();
 			[
-				['ohlc',
-					function(){
-						return axis('yAxis');
-					}, d3.format('$,.2fs')
-				],
-				['time',
-					function(){
-						return axis('xAxis');
-					}, function (time) {
-						return d3.time.format('%Y-%m-%d')(new Date(time));
-					}, [
-						function(t)	{
+				['y-ohlc',['yAxis', d3.format('$,.2fs')
+				]],
+				['x-time',[
+						'xAxis', function (time) {
+							return d3.time.format('%Y-%m-%d')(new Date(time));
+						}, function(t)	{
 							return t.width(65).translate([0, dim.dim[1]]);
+						}
+					]
+				],
+				['x-time-2',[
+						'xAxis', function (time) {
+							return d3.time.format('%Y-%m-%d')(new Date(time));
 						}
 					]
 				]
 			].forEach(function(item){
 				me.add.apply(this, item);
 			});
+		this.register('post', function(chart){
+			var scale 		= chart.scales.get,
+				annotations = {x:[],y:[]};
+				for(anno in chart.annotations.get()){ 
+					if(annotations[anno[0]]){
+						annotations[anno[0]].push(chart.annotations.get(anno));
+					}	else	{
+						console.warn('Did use annotation `'+anno+'` because it involved an invalid name');
+					}
+				}
+			var t = techan.plot.crosshair()
+				.xScale(scale('x'))
+				.yScale(scale('y'))
+				.xAnnotation(annotations.x)
+				.yAnnotation(annotations.y);
+			
+			chart.svg().focus.append('g')
+				.attr("class", "crosshair")
+				.call(t);
+		});
+		this.register('post', function(){
+			d3.selectAll('.crosshair path.wire').style("stroke", color);
+		});
 		return this;
 	};
 
 	Chart.Annotations = Annotations
-
-//-----------------------------------------
-//	Crosshair
-//-----------------------------------------
-	var Crosshairs = Chart.Yo(function(ctx, scales, annotations){
-		if(scales.constructor === Function)	{
-			scales = scales();
-		}	
-		if(annotations.constructor === Function)	{
-			annotations = annotations();
-		}	
-		var t = techan.plot.crosshair()
-				.xScale(scales[0])
-				.yScale(scales[1])
-				.xAnnotation(annotations[0])
-				.yAnnotation(annotations[1]);
-			
-		ctx.svg().focus.append('g')
-			.attr("class", "crosshair")
-			.call(t);
-		return t;
-	})
-
-	Crosshairs.prototype.init = function () {
-		var me 			= this,
-			scale 		= this.chart.scales.get,
-			annotation 	= this.chart.annotations.get;
-			[
-				['crosshair',
-					[
-						function(){
-							return [scale('x'), scale('y')];
-						},
-						function(){
-							return [annotation('time'), annotation('ohlc')];
-						}
-					]
-				]
-			].forEach(function(item){
-				me.add.apply(this, item);
-			});
-		return this;
-	};
-
-	Chart.Crosshairs = Crosshairs;
 
 //-----------------------------------------
 //	DataMapper
@@ -586,6 +541,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		if(domain.constructor === Function)	{
 			domain = domain();
 		}
+		console.log(ctx.id, domain);
 		scales.forEach(function(scale){
 			ctx.scales.get(scale).domain(domain);
 		});
@@ -597,17 +553,17 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			data 		= this.chart.data(),
 			series 	= this.chart.series.get;
 		[
-			['x-dom',
+			['x-main',
 				[
 					['x', 'x2'],function(){
-						return data.map(function(v){return new Date(series('candlestick')[0].accessor().d(v))})
+						return data.map(function(v){return new Date(v.date)})
 					}	
 				]
 			],
-			['y-dom',
+			['y-main',
 				[
 					['y', 'y2'],function(){
-						return techan.scale.plot.ohlc(data, series('candlestick')[0].accessor()).domain()
+						return techan.scale.plot.ohlc(data, series('main')[0].accessor()).domain()
 					}
 				]
 			],
@@ -651,13 +607,19 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			axis  		= chart.axes.get,
 			brush		= brush,
 			data 		= chart.data(),
-			indicators 	= chart.indicators.refresh,
 			zoomable 	= [scale('x').zoomable(), scale('x2').zoomable()];
 
 			brush.x(zoomable[1]);
 			context.select("g.pane").call(brush).selectAll("rect").attr("height", dim.height2);
-			zoomable[0].domain(brush.empty() ? zoomable[1].domain() : brush.extent());
-			scale('y').domain(techan.scale.plot.ohlc(data.slice.apply(data, zoomable[0].domain()), series('candlestick')[0].accessor()).domain());
+			scale('x').zoomable().domain(brush.empty() ? zoomable[1].domain() : brush.extent());
+			
+			var max = Math.max.apply(this, data.map(function(val){ 
+			   return Math.max(val.close,val.open,val.high,val.low);
+			}));
+			var min = Math.min.apply(this, data.map(function(val){ 
+			   return Math.min(val.close,val.open,val.high,val.low);
+			}));
+			scale('y').domain([min, max]);
 			
 			chart.plots.refresh();
 
@@ -665,34 +627,33 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			context.select("g.x.axis").call(axis('xAxis2'));
 			focus.select("g.y.axis").call(axis('yAxis'));
 
-			indicators();	
+			chart.indicators.refresh();	
 	};
 	Chart.DataMappers = DataMappers;
 //-----------------------------------------
 //	Plots
 //-----------------------------------------
-	var Plots = Chart.Yo(function(chart, series, data){
+	var Plots = Chart.Yo(function(chart, series, data, col){
 		if(data.constructor === Function){
 			data = data();
 		}
-		return chart.series.get(series)[1].append('g').datum(data)
-			.call(chart.series.get(series)[0]);
+		return chart.series.get(series)[1].datum(data)
+			.call(chart.series.get(series)[0])
+			.style('stroke',col)
+			.select('.line')
+			.style('stroke',col);
 	});
-	Plots.prototype.init = function() {
+	Plots.prototype.init = function(opt) {
+		console.log(opt);
 		var data = this.chart.data(),
 			me 	= this;
 		[
-			['candlestick', ['candlestick', this.chart.data]],
-			['volume', ['volume', this.chart.data]],
-			['close', ['close', this.chart.data]]
+			['main', ['main', this.chart.data, , (opt.main && opt.main.col)?opt.main.col:null]],
+			['volume', ['volume', this.chart.data, (opt.volume && opt.volume.col)?opt.volume.col:null]],
+			['bottom', ['bottom', this.chart.data, (opt.bottom && opt.bottom.col)?opt.bottom.col:null]]
 		].forEach(function(item){
 			me.add.apply(this, item);
 		});
-		this.register('pre', function(){
-			d3.select('.candlestick').html('');
-			d3.select('.volume').html('');
-			d3.select('.close').html('');
-		})
 		return this;
 	};
 	Chart.Plots = Plots;
