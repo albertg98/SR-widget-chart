@@ -687,6 +687,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		color = color || getRandomColor();
 		type = type || 'sma';
 		type = type.toLowerCase();
+		console.log(type, color, period);
 		var tma = techan.plot[type]()
 				.xScale(ctx.scales.get('x'))
 				.yScale(ctx.scales.get('y')),

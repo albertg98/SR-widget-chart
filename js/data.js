@@ -53,7 +53,7 @@ function getANDplot (ticker, from, to) {
 		getData(ticker,from,to).then(function(data){
 			getANDplot.chart.init(data.data, {title:data.name}
 				).next(function () {
-				// $('#ticker').val(data.ticker + '/' + (data.name?data.name:data.ticker));
+				$('#ticker').val(data.ticker + '/' + (data.name?data.name:data.ticker));
 				$('.loading').css({width:'0%',opacity:0});
 				$('.ticker-input').css({opacity: 0});
 				return data.ticker;
@@ -62,29 +62,30 @@ function getANDplot (ticker, from, to) {
 				getANDplot.to = to;
 				appmemory.save('ticker', ticker).then(function(){
 					console.log('updated ticker!');
-					res();
 				}, function(){
 					console.warn('failed to update!');
-					res();
 				});
-			}).next(function(){
-				indList.forEach(function(val){
-					addInd.apply(this, val.split('-'));
-				})
 			});
 		},function(reason){
 			console.log(reason);
 			$('.loading').css({width:'0%',opacity:0});
 			$('.ticker-input').css({opacity: 0});
-		});
+		}).then(function(){
+			indList.forEach(function(val){
+				console.log(val.split('-'));
+				addInd.apply(window, val.split('-'));
+			});
+			res();
+		},rej);
 	});
 }
 
 function addInd (type, period, color, price)	{
 	type = type || 'sma';
-	period = period || 15;
+	period = Number(period) || 15;
 	color = color || getRandomColor();
 	var id = type + '-' + period + '-' + color + '-' + price;
-	indList = Object.keys(getANDplot.chart.indicators.add(id, type, color, period).refresh().get());
+	console.log(id);
+	indList = Object.keys(getANDplot.chart.indicators.add(id, [type, color, period]).refresh().get());
 	return indList;
 }

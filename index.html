@@ -6,6 +6,7 @@
 		<!-- Bower -->
 			<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
 			<link rel="stylesheet" type="text/css" href="bower_components/fuelux/dist/css/fuelux.css">
+			<link rel="stylesheet" type="text/css" href="bower_components/mjolnic-bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
 		<!-- Bower -->
 		<link rel="stylesheet" type="text/css" href="css/main.css">
 		<link rel="stylesheet" type="text/css" href="css/plot.css">
@@ -19,16 +20,15 @@
 		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
 		<script type="text/javascript" src="bower_components/fuelux/dist/js/fuelux.js"></script>
 		<script type="text/javascript" src="bower_components/techan/dist/techan.js"></script>
-		<script type="text/javascript" src="bower_components/techan/dist/techan.map.js"></script>
 		<script type="text/javascript" src="bower_components/async/lib/async.js"></script>
 		<script type="text/javascript" src="bower_components/typeahead.js/dist/typeahead.bundle.js"></script>
+		<script type="text/javascript" src="bower_components/mjolnic-bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js"></script>
 	<!-- Bower -->
 	<!-- JS -->
 		<script type="text/javascript" src="js/memory.js"></script>
 		<script type="text/javascript" src="js/randomcolor.js"></script>
 		<script type="text/javascript" src="js/data.js"></script>
 		<script type="text/javascript" src="js/chart.js"></script>
-		<script type="text/javascript" src="js/chart2.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
 	<!-- JS -->
 </head>
@@ -59,11 +59,11 @@
 				</div>
 				<div class="modal-body">
 					<div class="row container">
-						<fieldset class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-								<legend>Indicator Add</legend>
-
+						<fieldset class="col-xs-12 col-sm-9 col-md-7 col-lg-6 ">
+							<legend>Indicator Add</legend>
+							<div class="row">
 								<!-- Select Basic -->
-								<div class="control-group">
+								<div class="control-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
 									<label class="control-label" for="selectbasic">Select Type</label>
 									<div class="controls">
 										<div class="btn-group selectlist" data-resize="auto" data-initialize="selectlist" id="select-type">
@@ -82,7 +82,7 @@
 								</div>
 
 								<!-- Spinbox -->
-								<div class="control-group ">
+								<div class="control-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
 									<label class="control-label" for="Period">Period</label>
 									<div class="controls">
 										<div class="spinbox" data-initialize="spinbox">
@@ -91,8 +91,15 @@
 										</div>
 									</div>
 								</div>
+							</div>
+							<div class="row">
+								<div class="input-group col-xs-6 col-xs-offest-6 col-sm-6 col-sm-offest-6 col-md-6 col-md-offest-6 col-lg-6 col-lg-offest-6 ind-color">
+									<input type="text" value="" class="form-control" />
+									<span class="input-group-addon"><i></i></span>
+								</div>
 								<button id="addind" name="singlebutton" class="btn btn-primary">Add</button>
-							</fieldset>
+							</div>
+						</fieldset>
 					</div>
 					<div class="row container">
 						<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 well" id="ind-cnt"></div>

@@ -1,6 +1,7 @@
 var chart;
 $(document).ready(function () {
 	/*Set Events*/
+	$('.ind-color').colorpicker({color:getRandomColor()});
 	$('#ticker')[0].onmouseenter = function () {
 		$('.ticker-input').css({opacity: 1});
 	}
@@ -17,12 +18,13 @@ $(document).ready(function () {
 		}
 	});
 	$('#addind')[0].onclick = function()	{
-		addInd(/strong>(.*?)<\/strong/i.exec($("#select-type .selected-label").html())[1].toLowerCase(),
+		addInd(
+			/strong>(.*?)<\/strong/i.exec($("#select-type .selected-label").html())[1].toLowerCase(),
 			Number($("#periods").val()),
-			'',
-			getRandomColor(),
-			true
+			$('.ind-color').colorpicker('getValue'),
+			'close'
 			);
+		$('.ind-color').colorpicker('setValue',getRandomColor());
 	};
 	/*Load typehead*/
 	SR.AppData.v1.Tickerlist.GET('j').then(function (tickerlist) {

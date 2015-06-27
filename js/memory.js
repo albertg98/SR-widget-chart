@@ -3,7 +3,7 @@ var appmemory = new SR.AppMemory(SR.AppID, SR.UserID);
 	appmemory.initMemory({
 		ticker: 'A',
 		indlist: [
-			'sma-20-blue-close',
+			'sma-15-black-close',
 			'ema-15-green-close'
 		]
 	});
@@ -40,14 +40,14 @@ function inputPush (type, period, price, color)	{
  * @param {String} color  
  * @param {Boolean} newind update list?
  */
-function addInd(type, period, price, color, newind)	{
-	(newind)&&(indList.push({type: type, period: period, price: price, color: color}));
-	appmemory.save('indlist',indList).then(function(){
-		mainChart.addMA(period, color, type);
-		inputPush(type, period, price, color);
-		console.log('updated indlist!');
-	}, function(){
-		console.warn('failed to update indlist');
-	})
-}
+// function addInd(type, period, price, color, newind)	{
+// 	(newind)&&(indList.push({type: type, period: period, price: price, color: color}));
+// 	appmemory.save('indlist',indList).then(function(){
+// 		mainChart.addMA(period, color, type);
+// 		inputPush(type, period, price, color);
+// 		console.log('updated indlist!');
+// 	}, function(){
+// 		console.warn('failed to update indlist');
+// 	})
+// }
 
