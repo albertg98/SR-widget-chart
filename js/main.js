@@ -1,5 +1,5 @@
+var chart;
 $(document).ready(function () {
-	window.mainChart = new Chart("#chart");
 	/*Set Events*/
 	$('#ticker')[0].onmouseenter = function () {
 		$('.ticker-input').css({opacity: 1});
@@ -12,19 +12,18 @@ $(document).ready(function () {
 		getANDplot($('#ticker').val().split('/')[0]);
 	}
 	$(document).keypress(function(e) {
-    	if(e.which == 13) {
-    		$('#ticker-change')[0].onclick();
-    	}
+		if(e.which == 13) {
+			$('#ticker-change')[0].onclick();
+		}
 	});
 	$('#addind')[0].onclick = function()	{
-
-		addInd (/strong>(.*?)<\/strong/i.exec($("#select-type .selected-label").html())[1],
+		addInd(/strong>(.*?)<\/strong/i.exec($("#select-type .selected-label").html())[1].toLowerCase(),
 			Number($("#periods").val()),
 			'',
-			getRandomColor()
+			getRandomColor(),
+			true
 			);
-			
-	}
+	};
 	/*Load typehead*/
 	SR.AppData.v1.Tickerlist.GET('j').then(function (tickerlist) {
 		var tickers = new Bloodhound({
@@ -56,11 +55,16 @@ $(document).ready(function () {
 	appmemory.load('indlist').then(function(indlist){
 		appmemory.load('ticker').then(function (ticker) {
 			indList = indlist;
-			getANDplot(ticker, mainChart, "2012-01-01", "2015-01-01").then(function(){
-				async.each(indlist, function(ind){
-					mainChart.addMA(ind.period, ind.color, ind.type);
-					alertCtrl(ind.type, ind.period, ind.price, ind.color);
-				});
+			getANDplot.chart = new techan.Chart('#chart', 
+				function(){
+					return	{
+						height: 0.9*window.innerHeight,
+						width: 0.99*window.innerWidth
+					}
+				}
+			);
+			getANDplot(ticker, "2012-01-01", "2015-01-01").then(function(){
+				
 			});
 		}).then(function(){
 			$('.loading').css({width:'0%',opacity:0})

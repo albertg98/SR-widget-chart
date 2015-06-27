@@ -1,3 +1,7 @@
+/**
+ * Generate random colord
+ * @return {String} a random color
+ */
 function getRandomColor() {
     var letters = '0123456789ABCDEF'.split('');
     var color = '#';

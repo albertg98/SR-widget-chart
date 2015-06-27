@@ -10,27 +10,23 @@ function getData (ticker, from, to) {
 		if(!getData[ticker])	{
 			SR.AppData.v1.direct.GET(ticker, 'pricedata',{from: from,to:to}).then(function (data) {
 				if(data.response.data.length > 0)	{
-					var sData = [];
-					async.map(data.response.data, function (val) {
-						sData.push({
-							date: new Date(val[0]).getTime(),
-							open: val[1],
-							low: val[2],
-							high: val[3],
-							close: val[4],
-							volume: val[5],
-							ExDividend: val[6],
-							name: data.response.stock_name
-						});
-						if(sData.length === data.response.data.length){
-							getData[ticker] = {
-								name  : data.response.stock_name,
-								ticker: data.response.ticker,
-								data  : sData
-							};
-							res(getData[ticker]);
-						}
-					});
+					getData[ticker] = {
+						name  : data.response.stock_name,
+						ticker: data.response.ticker,
+						data  : data.response.data.map(function(val){
+							return {
+								date: new Date(val[0]).getTime(),
+								open: val[1],
+								low: val[2],
+								high: val[3],
+								close: val[4],
+								volume: val[5],
+								ExDividend: val[6],
+								name: data.response.stock_name
+							}
+						}).reverse()
+					};
+					res(getData[ticker]);
 				}	else	{
 					rej('No Data Available')
 				}
@@ -49,35 +45,31 @@ function getData (ticker, from, to) {
  * @param  {Date/Number/String} to     
  * @return {Promise} 
  */
-function getANDplot (ticker, mainChart, from, to) {
+function getANDplot (ticker, from, to) {
 	from = getANDplot.from || from;
 	to = getANDplot.to || to;
-	mainChart = getANDplot.mainChart || mainChart;
 	return new Promise(function(res, rej){
 		$('.loading').css({width:'100%',opacity:1});
 		getData(ticker,from,to).then(function(data){
-			getANDplot.from = from;
-			getANDplot.to = to;
-			getANDplot.mainChart = mainChart;
-			mainChart.draw({
-				height: window.innerHeight, 
-				width: window.innerWidth
-			}, data.data).then(function (chart) {
-				$('#ticker').val(data.ticker + '/' + (data.name?data.name:data.ticker));
-				chart.title((data.name?data.name:data.ticker), {size:20, sizemod:true});
+			getANDplot.chart.init(data.data, {title:data.name}
+				).next(function () {
+				// $('#ticker').val(data.ticker + '/' + (data.name?data.name:data.ticker));
 				$('.loading').css({width:'0%',opacity:0});
 				$('.ticker-input').css({opacity: 0});
 				return data.ticker;
-			},function(reason){
-				console.log(reason);
-				$('.loading').css({width:'0%',opacity:0});
-				$('.ticker-input').css({opacity: 0});
-			}).then(function(ticker){
-				res();
+			}).next(function(ticker){
+				getANDplot.from = from;
+				getANDplot.to = to;
 				appmemory.save('ticker', ticker).then(function(){
 					console.log('updated ticker!');
+					res();
 				}, function(){
 					console.warn('failed to update!');
+					res();
+				});
+			}).next(function(){
+				indList.forEach(function(val){
+					addInd.apply(this, val.split('-'));
 				})
 			});
 		},function(reason){
@@ -86,4 +78,13 @@ function getANDplot (ticker, mainChart, from, to) {
 			$('.ticker-input').css({opacity: 0});
 		});
 	});
+}
+
+function addInd (type, period, color, price)	{
+	type = type || 'sma';
+	period = period || 15;
+	color = color || getRandomColor();
+	var id = type + '-' + period + '-' + color + '-' + price;
+	indList = Object.keys(getANDplot.chart.indicators.add(id, type, color, period).refresh().get());
+	return indList;
 }
