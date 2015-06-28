@@ -24,11 +24,10 @@
     "d3": "~3.5.5",
     "async": "~1.2.1",
     "techan": "~0.5.0",
-    "foundation": "~5.5.2",
-    "devbridge-autocomplete": "~1.2.21",
-    "jquery-auto-complete": "~1.0.5",
     "typeahead.js": "~0.11.1",
     "bootstrap": "~3.3.5",
-    "fuelux": "~3.8.0"
+    "fuelux": "~3.8.0",
+    "mjolnic-bootstrap-colorpicker": "~2.2.0",
+    "bootstrap-datepicker": "~1.4.0"
   }
 }
