@@ -3,8 +3,8 @@ var appmemory = new SR.AppMemory(SR.AppID, SR.UserID);
 	appmemory.initMemory({
 		ticker: 'A',
 		indlist: [
-			'sma-15-black-close',
-			'ema-15-green-close'
+			'sma-15-#63F806-close',
+			'ema-15-#E01F1F-close'
 		]
 	});
 /*Global variables*/
@@ -27,8 +27,8 @@ function inputPush (type, period, price, color)	{
 		html.find('.alert-text').append($('<span> - ' + color + '</span>'));
 		html[0].id = type + '-' + period + '-' + color + '-' + price;
 		html.click(function(me){
-			console.log(me.target.parentElement.id);
-			getANDplot.chart.indicators.del(me.target.parentElement.id).refresh();
+			indList = Object.keys(getANDplot.chart.indicators.del(me.target.parentElement.id).refresh().get());
+			appmemory.save('indlist', indList).then(function(){});
 		});
 		$('#ind-cnt').append(html);
 }

@@ -5,6 +5,10 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 //	Chart Class
 //-----------------------------------------
 	function Chart (cntid, dim, data) {
+		/*Error Handling*/
+		Chart.assert(d3.select(cntid)[0].length > 0 , "Can\'t make chart on non-existing container!");
+		Chart.check(dim, Object, "dimensions", "new Chart()");
+		(data)&&Chart.check(data, Array, "data", "new Chart()");
 		/*Dimensions*/
 		var margins, width, height2, height, d;
 		/**
@@ -57,7 +61,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 
 		/*Set*/
 		this.scales = new Chart.Scales(this);
-		this.series = new Chart.Series(this);
 		this.axes = new Chart.Axes(this);
 		this.annotations = new Chart.Annotations(this);
 		this.dataMappers = new Chart.DataMappers(this);
@@ -69,17 +72,29 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		this.data = function()	{
 			return data;
 		}
+		/*Create a promise*/
 		var nextdata;
 		this.next = function(fcn)	{
 			nextdata = fcn(nextdata) || nextdata;
 			return this;
 		}
-		/*Initilization*/
+		var me = this;
+		/**
+		 * Initialize plot
+		 * @param  {Object} ndata new data
+		 * @param  {Object} opt   
+		 * @return {this}       
+		 */
 		this.init = function(ndata, opt)	{
-			if(!opt || !opt.style)	{opt.style = 'ohlc'};
+			/*set defaults*/
+			if(!opt)	{opt = {}};
+			if(!opt.style)	{opt.style = 'ohlc'};
+			if(!opt.hasOwnProperty('refresh')) {opt.refresh = true};
+			/*Error handling*/
+			ndata&&Chart.check(ndata, Array, "new data", "chart.init");
+			Chart.check(opt, Object, "options", "chart.init");
 			/*Styling*/
 			this.scales.del('*').release('pre').release('post').init();
-			this.series.del('*').release('pre').release('post').init(opt.style);
 			this.axes.del('*').release('pre').release('post').init((opt&&opt.xlab)?opt.xlab:toptions.xlab);
 			this.annotations.del('*').release('pre').release('post').init((opt&&opt.crosshair && opt.crosshair.col)?opt.crosshair.col:null);
 			this.indicators.del('*').release('pre').release('post').init();
@@ -89,10 +104,25 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			this.dataMappers.init();
 			/*title*/
 			this.refresh(data, opt);
+			/*set resizing event*/
+			if(opt.refresh)	{
+				window.onresize = function()	{
+					me.refresh();
+				}
+			};
 			return this;
 		}
-		var me = this;
+		
+		/**
+		 * Refreshes the plot
+		 * @param  {Object} ndata new data
+		 * @param  {Object} opt   
+		 * @return {this}       
+		 */
 		this.refresh = function(ndata, opt)	{
+			/*Error handling*/
+			ndata&&Chart.check(ndata, Array, "new data", "chart.init");
+			Chart.check(opt, Object, "options", "chart.init");
 			/*empty old*/
 			d3.select(cntid).html("");
 			/*Rebuild*/
@@ -112,7 +142,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			/*styling*/
 			data = ndata || data;
 			me.scales.refresh();
-			me.series.refresh();
 			me.axes.refresh();
 			me.annotations.refresh();
 			me.dataMappers.refresh();
@@ -125,7 +154,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					toptions = opt.title;
 				}
 			};
-			toptions.col = toptions.col || (opt.stroke || null);
+			toptions.col = toptions.col || ((opt&&opt.stroke)?opt.stroke:null);
 			me.title();
 			/*color*/
 			d3.selectAll('.axis path, .axis line').style('stroke',(opt&&opt.stroke)?opt.stroke:null);
@@ -133,9 +162,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			return this;
 		}
 		
-		window.onresize = function()	{
-			me.refresh();
-		}
 		/**
 		 * adds a title
 		 * @param  {String} title   
@@ -145,11 +171,17 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		this.title = function (title, options) {
 			options = options || toptions.options;
 			title = title || toptions.text;
+			/*Error handling*/
+			Chart.check(title, String, "title-text","chart.title");
+			Chart.check(options, Object, "title-options", "chart.title")
+			/*If there is a title*/
 			if(title) {
 				toptions = {text: title, options: options};
 				if(!options.size) options.size = 0.02*width;
 					topt = {title:title, options:options};
-				$('#ticker-text').html('');
+				/*clear old title*/
+				svg.select('#ticker-text').remove();
+				/*Make title*/
 				svg.append("text")
 					.attr("id", "ticker-text")
 					.attr("x", options.x || (width / 2))             
@@ -161,7 +193,38 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			};
 		}
 	}
-
+//-----------------------------------------
+//	Error Handlers
+//-----------------------------------------
+	Chart.assert = function(assertion, msg)	{
+		if(!assertion)	{
+			throw new Error(msg);
+		}
+	}
+	Chart.check = function(obj, type, name, fcn)	{
+		Chart.assert(type, "Wrong " + name + " passed into " + fcn + " must be of `" + type.name + "` class.");
+	}
+//-----------------------------------------
+//	Math methods
+//-----------------------------------------
+	Chart.highlow = function(data, type)	{
+		type = type || '*';
+		var max = Math.max.apply(this, data.map(function(val){
+			if(type === '*')	{ 
+				return Math.max(val.close,val.open,val.high,val.low);
+			}	else	{
+				return val[type];
+			}
+		}));
+		var min = Math.min.apply(this, data.map(function(val){ 
+			if(type === '*')	{
+				return Math.min(val.close,val.open,val.high,val.low);
+			}	else	{
+				return val[type];
+			}
+		}));
+		return [min, max];
+	}
 //-----------------------------------------
 //	Yotzer - Process Maintainer
 //-----------------------------------------
@@ -332,59 +395,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 	Chart.Scales = Scales;
 
 //-----------------------------------------
-//	Series - Series Maker
-//-----------------------------------------
-	/**
-	 * @param  {this} ctx                              
-	 * @param  {String} type                             
-	 * @param  {Array|Function} scales  Array of Scales
-	 * @return {Series}                                  
-	 */
-	var Series = Chart.Yo(function(chart, type, scales, loc){
-		var scale 	= chart.scales.get,
-			t = techan.plot[type]()
-					.xScale(scale(scales[0]))
-					.yScale(scale(scales[1])),
-			loc = loc || "focus";
-			chart.svg()[loc].select('.' + chart.id).remove();
-		var svg = chart.svg()[loc].append("g")
-				.attr("class", chart.id)
-				.attr("clip-path", "url(#clip)");
-
-			return [t, svg];				
-	})
-
-	Series.prototype.init = function (style) {
-		/*Set defaults*/
-		var scales 	= this.chart.scales.get,
-			me 		= this,
-			data 	= this.chart.data();
-			[
-				['main',
-					[style, ['x','y'], false]
-				],
-				['volume',
-					['volume', ['x', 'y-volume'], false]
-				],
-				['indicators',
-					['close', ['x', 'y'], false]
-				],
-				['bottom',
-					['close', ['x2', 'y2'], "context"]
-				]
-			].forEach(function(item){
-				me.add.apply(this, item);
-			});	
-		this.register('pre', function(ctx){
-			ctx.svg().context.append("g")
-				.attr("class", "pane");
-		});
-		return this;
-	};
-
-	Chart.Series = Series
-
-//-----------------------------------------
 //	Axes -  Axis Maker
 //-----------------------------------------
 	/**
@@ -491,15 +501,9 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 				]],
 				['x-time',[
 						'xAxis', function (time) {
-							return d3.time.format('%Y-%m-%d')(new Date(time));
+							return new Date(time).toLocaleString();
 						}, function(t)	{
 							return t.width(65).translate([0, dim.dim[1]]);
-						}
-					]
-				],
-				['x-time-2',[
-						'xAxis', function (time) {
-							return d3.time.format('%Y-%m-%d')(new Date(time));
 						}
 					]
 				]
@@ -541,52 +545,50 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		if(domain.constructor === Function)	{
 			domain = domain();
 		}
-		scales.forEach(function(scale){
-			ctx.scales.get(scale).domain(domain);
+		scales.map(function(scale){
+			return ctx.scales.get(scale).domain(domain);
 		});
-		return domain;
+		return scales;
 	});
 
 	DataMappers.prototype.init = function () {
 		var me 			= this,
-			data 		= this.chart.data(),
-			series 	= this.chart.series.get;
+			data 		= this.chart.data();
 		[
 			['x-main',
 				[
 					['x', 'x2'],function(){
-						return data.map(function(v){return new Date(v.date)})
+						return data.map(function(v){return new Date(v.date)});
 					}	
 				]
 			],
 			['y-main',
 				[
 					['y', 'y2'],function(){
-						return techan.scale.plot.ohlc(data, series('main')[0].accessor()).domain()
+						return Chart.highlow(data);
 					}
 				]
 			],
 			['y-volume',
 				[
-					['y-volume'],
-					techan.scale.plot.volume(data).domain()
+					['y-volume'],function(){
+						return Chart.highlow(data, 'volume');
+					}
 				]
 			]
 		].forEach(function(item){
 			me.add.apply(this, item);
 		});
+		this.register('pre', function(ctx){
+			ctx.svg().context.append("g")
+				.attr("class", "pane");
+			ctx.svg().focus.append("g")
+				.attr("class", "pane");
+		})
 		this.register('post', function(){
-			me.svg();
 			me.draw(me.chart, me.brush());
 		});
 		return this;
-	};
-	DataMappers.prototype.svg = function()	{
-		var data 	= this.chart.data(),
-			focus	= this.chart.svg().focus,
-			context	= this.chart.svg().context,
-			series 	= this.chart.series.get,
-			axis 	= this.chart.axes.get;
 	};
 	DataMappers.prototype.brush = function() {
 		if(!this.__brush)	{
@@ -601,54 +603,76 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		var focus		= chart.svg().focus,
 			context		= chart.svg().context,
 			dim  		= chart.getDim(),
-			series  	= chart.series.get,
 			scale  		= chart.scales.get,
 			axis  		= chart.axes.get,
 			brush		= brush,
 			data 		= chart.data(),
 			zoomable 	= [scale('x').zoomable(), scale('x2').zoomable()];
 
-			brush.x(zoomable[1].clamp(false));
-			context.select("g.pane").call(brush).selectAll("rect").attr("height", dim.height2);
+			/*Zoom*/
+			brush.x(zoomable[1]);
+			context.select("g.pane")
+				.call(brush)
+				.selectAll("rect")
+				.attr("height", dim.height2);
 			scale('x').zoomable().domain(brush.empty() ? zoomable[1].domain() : brush.extent());
 			
-			var max = Math.max.apply(this, data.map(function(val){ 
-			   return Math.max(val.close,val.open,val.high,val.low);
-			}));
-			var min = Math.min.apply(this, data.map(function(val){ 
-			   return Math.min(val.close,val.open,val.high,val.low);
-			}));
-			scale('y').domain([min, max]);
+			/*Set Y-axis*/
+			scale('y').domain(Chart.highlow(data));
 			
+			/*Build plots*/
 			chart.plots.refresh();
 
+			/*Create Axis*/
 			focus.select("g.x.axis").call(axis('xAxis'));
 			context.select("g.x.axis").call(axis('xAxis2'));
 			focus.select("g.y.axis").call(axis('yAxis'));
-
+			/*Call indicators*/
 			chart.indicators.refresh();	
 	};
 	Chart.DataMappers = DataMappers;
 //-----------------------------------------
 //	Plots
 //-----------------------------------------
-	var Plots = Chart.Yo(function(chart, series, data, col){
+	var Plots = Chart.Yo(function(chart, type, scales, loc, col, data){
 		if(data.constructor === Function){
 			data = data();
 		}
-		return chart.series.get(series)[1].datum(data)
-			.call(chart.series.get(series)[0])
-			.style('stroke',col)
-			.select('.line')
-			.style('stroke',col);
+		/*Check types*/
+		(data)&&Chart.check(data , Array, "data", "chart.plot.add");
+		Chart.check(scales, String, "scales", "chart.plot.add");
+		Chart.check(loc, String, "loc", "chart.plot.add");
+		Chart.check(col, String, "col", "chart.plot.add");
+		Chart.check(type, String, "type", "chart.plot.add");
+		/*Create plot*/
+		var scale 	= chart.scales.get,
+			t = techan.plot[type]()
+					.xScale(scale(scales[0]))
+					.yScale(scale(scales[1]));
+		
+		/*Clear container if it exists*/
+			chart.svg()[loc].select('.' + chart.id + '-' + type).remove();
+		/*Create svg*/
+		var svg = chart.svg()[loc].append("g")
+				.attr("class", chart.id + '-' + type)
+				.attr("clip-path", "url(#clip)");
+		/*Parse data*/
+		if(data)	{
+			svg.datum(data)
+				.call(t)
+				.style('stroke',col)
+				.select('.line')
+				.style('stroke',col);
+		};
+		return [svg,t];
 	});
 	Plots.prototype.init = function(opt) {
 		var data = this.chart.data(),
 			me 	= this;
 		[
-			['main', ['main', this.chart.data, , (opt.main && opt.main.col)?opt.main.col:null]],
-			['volume', ['volume', this.chart.data, (opt.volume && opt.volume.col)?opt.volume.col:null]],
-			['bottom', ['bottom', this.chart.data, (opt.bottom && opt.bottom.col)?opt.bottom.col:null]]
+			['volume', ['volume', ['x', 'y-volume'], "focus", (opt.volume && opt.volume.col)?opt.volume.col:null, this.chart.data]],
+			['main', [(opt.main && opt.main.style)?opt.main.style:'close', ['x','y'], "focus", (opt.main && opt.main.col)?opt.main.col:null, this.chart.data]],
+			['bottom', ['close', ['x2', 'y2'], "context", (opt.bottom && opt.bottom.col)?opt.bottom.col:null, this.chart.data]]
 		].forEach(function(item){
 			me.add.apply(this, item);
 		});
@@ -658,28 +682,47 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 //-----------------------------------------
 //	Indicators
 //-----------------------------------------
-	var Indicators = Chart.Yo(function(ctx, type, color, period){
+	var Indicators = Chart.Yo(function(chart, type, color, period, data){
+		/*Set defaults*/
 		period = period || 10;
 		color = color || getRandomColor();
 		type = type || 'sma';
 		type = type.toLowerCase();
+		data = data || chart.data;
+		/*create data if needed*/
+		if(data.constructor === Function){
+			data = data();
+		}
+		/*Checks*/
+		Chart.check(type, String, "type", "chart.indicators.add");
+		(data)&&Chart.check(data, Array, "data", "chart.indicators.add");
+		Chart.check(color, String, "color", "chart.indicators.add");
+		Chart.check(period, Number, "period", "chart.indicators.add");
+		/*Create plot*/
 		var tma = techan.plot[type]()
-				.xScale(ctx.scales.get('x'))
-				.yScale(ctx.scales.get('y')),
-			g = d3.select('.indicators').append("g")
-			.attr("class", "indicator " + type + " ma-0")
-			.attr("clip-path", "url(#clip)");
+				.xScale(chart.scales.get('x'))
+				.yScale(chart.scales.get('y'));
 
-		g.datum(techan.indicator[type]()
-			.period(period)(ctx.data())).call(tma);
-		g.select('path')
-			.style('stroke',color);
-		return [g, tma];
+		/*clear svg if needed*/
+			// chart.svg().focus.select('.' + chart.id.replace(/#/g,"") + ".indicator." + type).remove();
+		/*Create svg*/
+		var svg = chart.svg().focus.append("g")
+				.attr("class", chart.id.replace(/#/g,"") + " indicator " + type)
+				.attr("clip-path", "url(#clip)");
+		
+		/*add data*/
+		if(data)	{
+			svg.datum(techan.indicator[type]()
+				.period(period)(data)).call(tma)
+				.select('path')
+				.style('stroke',color);
+		}
+		return [svg, tma];
 	});
 
 	Indicators.prototype.init = function () {
 		this.register('pre', function(chart){
-			d3.select('.indicators').html('');
+			d3.selectAll('.indicator').remove();
 		});
 		return this;
 	};

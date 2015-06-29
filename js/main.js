@@ -39,11 +39,9 @@ $(document).ready(function () {
 					}
 				}
 			);
-			getANDplot(ticker, "2012-01-01", "2015-01-01").then(function(){
-				
+			getANDplot(ticker).then(function(){
+				$('.loading').css({width:'0%',opacity:0})
 			});
-		}).then(function(){
-			$('.loading').css({width:'0%',opacity:0})
 		});
 	});
 });

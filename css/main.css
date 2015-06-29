@@ -25,13 +25,8 @@
 	z-index: 9001;
 	text-align: center;
 	transition: all, 0.75s, ease-in-out;
-}
-
-.alert-danger {
-	opacity: 0;
-}
-
-.alert-success {
+	margin: 15% 0;
+	width: 50%;
 	opacity: 0;
 }
 
