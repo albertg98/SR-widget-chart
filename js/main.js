@@ -43,7 +43,12 @@ $(document).ready(function () {
 				
 			});
 		}).then(function(){
-			$('.loading').css({width:'0%',opacity:0})
+			$('.loading').css({
+                            'width'   : '0%',
+                            'opacity' : '0px',
+                            'height'  : '0px',
+                            'display' : 'none'
+                        })
 		});
 	});
 });
