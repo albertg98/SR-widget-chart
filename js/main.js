@@ -34,7 +34,7 @@ $(document).ready(function () {
 		},function(reason){
 			console.log(reason);
 			if(reason[1] === 'timeout' && cnt < 2)	{
-				typeaheadLoad(cnt);
+				typeaheadLoad(cnt+1);
 			}	else	{
 				FAIL("Could not load tiker-list due to `" + reason[1] + '`');
 			}

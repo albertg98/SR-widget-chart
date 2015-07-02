@@ -64,6 +64,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		this.axes = new Chart.Axes(this);
 		this.crosshair = new Chart.Crosshair(this);
 		this.supstances = new Chart.Supstances(this);
+		this.trendlines = new Chart.Trendlines(this);
 		this.dataMappers = new Chart.DataMappers(this);
 		this.indicators = new Chart.Indicators(this);
 		this.plots = new Chart.Plots(this);
@@ -98,7 +99,8 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			this.scales.del('*').release('pre').release('post').init();
 			this.axes.del('*').release('pre').release('post').init((opt&&opt.xlab)?opt.xlab:toptions.xlab);
 			this.crosshair.del('*').release('pre').release('post').init((opt&&opt.crosshair && opt.crosshair.col)?opt.crosshair.col:null);
-			this.supstances.del('*').release('pre').release('post').init((opt&&opt.crosshair && opt.crosshair.col)?opt.crosshair.col:null);
+			this.supstances.del('*').release('pre').release('post').init();
+			this.trendlines.del('*').release('pre').release('post').init();
 			this.indicators.del('*').release('pre').release('post').init();
 			this.plots.del('*').release('pre').release('post').init((opt&&opt.plots)?opt.plots:{});
 			/*data*/
@@ -149,6 +151,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			me.dataMappers.refresh();
 			me.indicators.refresh();
 			me.supstances.refresh();
+			// me.trendlines.refresh();
 			/*title*/
 			if(opt&&opt.title)	{
 				if(opt.title.constructor === String)	{
@@ -234,6 +237,21 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 	}
 	Chart.hlmean = function(data)	{
 		return Chart.highlow(data).reduce(function(pv, cv) { return pv + cv; }, 0)/2;
+	}
+	var pmima = [0,100];
+	Chart.precent = function(val, min, max)	{
+		pmima[0] = min || pmima[0];
+		pmima[1] = max || pmima[1];
+		return (val-pmima[0])/(pmima[1]-pmima[0]);
+	}
+	Chart.findCloset = function(dat, num)	{
+		return dat.reduce(function(d,b){
+			if(Math.abs(d.value - num)>Math.abs(b.value - num)) {
+				return b
+			}	else	{
+				return d
+			};
+		});
 	}
 //-----------------------------------------
 //	Yotzer - Process Maintainer
@@ -559,7 +577,27 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 
 	Chart.Crosshair = Crosshair
 //-----------------------------------------
-//	Supstance
+//	Special methods 
+//-----------------------------------------
+	function mouseEnter(valueText){
+		return function(d) {
+			valueText.style("display", "inline");
+			valueText.text("Value: " + d3.format(',.2fs')(d.value));
+		}
+	}
+	function mouseOut(valueText){
+		return function () {
+			valueText.style("display", "none");
+		}
+	}
+	function drag(valueText, ctx){
+		return function (d) {
+			valueText.text("Value: " + d3.format(',.2fs')(d.value));
+			if(ctx.ondrag){ ctx.ondrag(d.value||d, d.id); };
+		}
+	}
+//-----------------------------------------
+//	Supstances
 //-----------------------------------------
 	var Supstances = Chart.Yo(function(chart, value){
 		if(value.constructor === Function)	{
@@ -571,83 +609,143 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 	});
 
 	Supstances.prototype.init = function (color) {
-		var me 	 = this,
-			dim  = this.chart.getDim(),
-			data = this.chart.data;
 		this.register('pre', function(chart){
 			chart.svg().focus.selectAll('g.supstances').remove();
 			chart.svg().focus.selectAll('text.supstances-coords').remove();
 		});
 		this.register('post', function(chart){
+				var dim = chart.getDim(),
 			/*Annotations*/
-			var axes = chart.axes.get;
-			var ohlc = techan.plot.axisannotation()
-				.axis(axes('yAxis'))
-				.format(d3.format(',.2fs'));
+				axes = chart.axes.get,
+				ohlc = techan.plot.axisannotation()
+					.axis(axes('yAxis'))
+					.format(d3.format(',.2fs')),
 
-			var percent = techan.plot.axisannotation()
-				.axis(axes('%Axis'))
-				.format(d3.format('+.1%'));
+				percent = techan.plot.axisannotation()
+					.axis(axes('%Axis'))
+					.format(d3.format('+.1%')),
+			/*Value text*/
+				valueText = chart.svg().svg.append('text')
+					.style("text-anchor", "end")
+					.attr("class", "supstances-coords")
+					.attr("x", dim.dim[0] - 5)
+					.attr("y", 15),
 			/*Supstance-render*/
-			var scales = chart.scales.get,
+				scales = chart.scales.get,
 				supstance = techan.plot.supstance()
-				.xScale(scales('x'))
-				.yScale(scales('y'))
-				.annotation([ohlc, percent])
-				.on("mouseenter", function (d) {
-					valueText.style("display", "inline");
-					valueText.text("Value: " + d3.format(',.2fs')(d.value));
-				})
-				.on("mouseout", function () {
-					valueText.style("display", "none");
-				})
-				.on("drag", function (d) {
-					valueText.text("Value: " + d3.format(',.2fs')(d.value));
-					if(chart.supstances.ondrag){ chart.supstances.ondrag(d.value, d.id); };
-				});
-			/*SVG*/
-			var valueText = chart.svg().svg.append('text')
-				.style("text-anchor", "end")
-				.attr("class", "supstances-coords")
-				.attr("x", dim.dim[0] - 5)
-				.attr("y", 15);
-
-			chart.svg().focus.append('g')
-				.attr('class','supstances')
-				.datum(chart.supstances.getA())
-				.call(supstance).call(supstance.drag)
-				.on("click", function(d){
-					var num = Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""));
-					if(chart.supstances.onclick) {
-						chart.supstances.onclick(d.reduce(function(d,b){
-							if(Math.abs(d.value - num)>Math.abs(b.value - num)) {
-										return b
-									}	else	{
-										return d
-									};
-								})
-							)
-					}
-				})
-				.on("dblclick", function(d){
-					var num = Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""));
-					if(chart.supstances.ondbclick) {
-						chart.supstances.ondbclick(d.reduce(function(d,b){
-							if(Math.abs(d.value - num)>Math.abs(b.value - num)) {
-										return b
-									}	else	{
-										return d
-									};
-								})
-							)
-					}
-				});
+					.xScale(scales('x'))
+					.yScale(scales('y'))
+					.annotation([ohlc, percent])
+					.on("mouseenter", mouseEnter(valueText))
+					.on("mouseout", mouseOut(valueText))
+					.on("drag", drag(valueText, chart.supstances));
+			/*create supstance*/
+				chart.svg().focus.append('g')
+					.attr('class','supstances')
+					.datum(chart.supstances.getA())
+					.call(supstance).call(supstance.drag)
+					.on("click", function(d){
+						if(chart.supstances.onclick) {
+							chart.supstances.onclick(Chart.findCloset(d, Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""))))
+						}
+					})
+					.on("dblclick", function(d){
+						var num = Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""));
+						if(chart.supstances.ondbclick) {
+							chart.supstances.ondbclick(Chart.findCloset(d, Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""))))
+						}
+					});
 		});
 		return this;
 	};
 
 	Chart.Supstances = Supstances
+//-----------------------------------------
+//	Trendlines
+//-----------------------------------------
+	var Trendlines = Chart.Yo(function(chart, values, dates){
+		if(values.constructor === Function)	{
+			values = values();
+		}
+		Chart.check(values, Array, "values", "chart.supstance");
+		if(dates.constructor === Function)	{
+			dates = dates();
+		}
+		Chart.check(dates, Array, "from-to (milliseconds)", "chart.supstance");
+		console.log(values, dates);
+		return { id: chart.id, 
+			start: {
+				date: new Date(dates[0]), 
+				value: values[0]
+			}, end: {
+				date: new Date(dates[1]), 
+				value: values[1]
+			}
+		};
+	});
 
+	Trendlines.prototype.init = function (color) {
+		var me 	 = this,
+			data = this.chart.data;
+		// [
+		// 	['test', [
+		// 		function(){return Chart.highlow(data())},
+		// 		function(){return Chart.highlow(data(),'date')}
+		// 	]]
+		// ].forEach(function(item){
+		// 	me.add.apply(this, item);
+		// });
+		this.register('pre', function(chart){
+			chart.svg().focus.selectAll('g.trendlines').remove();
+			chart.svg().focus.selectAll('text.trendlines-coords').remove();
+		});
+		this.register('post', function(chart){
+				var dim = chart.getDim(),
+			/*Annotations*/
+				axes = chart.axes.get,
+				ohlc = techan.plot.axisannotation()
+					.axis(axes('yAxis'))
+					.format(d3.format(',.2fs')),
+
+				percent = techan.plot.axisannotation()
+					.axis(axes('%Axis'))
+					.format(d3.format('+.1%')),
+			/*Value text*/
+				valueText = chart.svg().svg.append('text')
+					.style("text-anchor", "end")
+					.attr("class", "trendlines-coords")
+					.attr("x", dim.dim[0] - 5)
+					.attr("y", 15),
+			/*Supstance-render*/
+				scales = chart.scales.get,
+				supstance = techan.plot.supstance()
+					.xScale(scales('x'))
+					.yScale(scales('y'))
+					.annotation([ohlc, percent])
+					.on("mouseenter", mouseEnter(valueText))
+					.on("mouseout", mouseOut(valueText))
+					.on("drag", drag(valueText, chart.trendlines));
+			/*create supstance*/
+				chart.svg().focus.append('g')
+					.attr('class','supstances')
+					.datum(chart.supstances.getA())
+					.call(supstance).call(supstance.drag)
+					.on("click", function(d){
+						if(chart.supstances.onclick) {
+							chart.supstances.onclick(Chart.findCloset(d, Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""))))
+						}
+					})
+					.on("dblclick", function(d){
+						var num = Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""));
+						if(chart.supstances.ondbclick) {
+							chart.supstances.ondbclick(Chart.findCloset(d, Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""))))
+						}
+					});
+		});
+		return this;
+	};
+
+	Chart.Trendlines = Trendlines
 //-----------------------------------------
 //	DataMapper
 //-----------------------------------------
