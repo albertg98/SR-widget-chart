@@ -52,7 +52,12 @@ function getANDplot (ticker, from, to) {
 	return new Promise(function(res, rej){
 		$('#ind-cnt').html('');
 		$('.ticker-input').css({opacity: 0});
-		$('.loading').css({width:'100%',opacity:1});
+		// $('.loading').css({width:'100%',opacity:1});
+		$('.loading').css({
+			'width'   : '100%',
+			'opacity' : 1,
+			'height'  : '100%'
+		});
 		getData(ticker,from,to).then(function(data){
 			getANDplot.chart.init(data.data, {
 				background: "white",
@@ -108,9 +113,12 @@ function getANDplot (ticker, from, to) {
 			}
 			getANDplot.chart.supstances.ondrag = function(val, id){
 				supstances[id] = (val-hl[0])/(hl[1]-hl[0]);
+				console.log(id);
 				appmemory.save('supstances', supstances).then(function(){},function(fail){
 					console.warm('failed to save `ondrag-supstances`', fail);
 				});
+				getANDplot.chart.supstances.add(id, val);
+				console.log(getANDplot.chart.supstances.get());
 			};
 			getANDplot.chart.crosshair.ondbclick = function(x, y){
 				addSup((Number(y.replace(/\$/g,""))-hl[0])/(hl[1]-hl[0])).refresh();
