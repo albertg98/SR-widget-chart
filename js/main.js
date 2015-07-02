@@ -45,6 +45,13 @@ $(document).ready(function () {
 					$('.loading').css({width:'0%',opacity:0})
 				});
 			});
+		}).then(function(){
+			$('.loading').css({
+                            'width'   : '0%',
+                            'opacity' : '0px',
+                            'height'  : '0px',
+                            'display' : 'none'
+                        })
 		});
 	});
 });
