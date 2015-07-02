@@ -1,8 +1,11 @@
 var chart;
 $(document).ready(function () {
+	/*Set as local if needed*/
 	if(window.location.hostname === "localhost" && window.location.port === "8080"){
 		SR.LOCAL = true;
 	};
+	/*Loader*/
+	srloader.start();
 	/*Load typehead*/
 	function typeaheadLoad(cnt) {cnt = cnt || 0;
 		SR.AppData.v1.Tickerlist.GET('j').then(function (tickerlist) {
@@ -48,21 +51,21 @@ $(document).ready(function () {
 				indList 	= indlist;
 				supstances 	= sups;
 				getANDplot.chart = new techan.Chart('#chart', 
-					function(){
-						return	{
-							height: 0.9*window.innerHeight,
-							width: 0.99*window.innerWidth
-						}
-					}
-					);
-				getANDplot(ticker).then(function(){
-					$('.loading').css({
-						'width'   : '0%',
-						'opacity' : '0px',
-						'height'  : '0%',
-					})
+					function(){ return	{height: 0.9*window.innerHeight, width: 0.99*window.innerWidth}
 				});
-			});
+				getANDplot(ticker).then(function(){
+					srloader.stop();
+				});
+			}, function(reason){
+			console.warn(reason);
+			srloader.error();
+		});
+		}, function(reason){
+			console.warn(reason);
+			srloader.error();
 		})
+	}, function(reason){
+		console.warn(reason);
+		srloader.error();
 	});
 });

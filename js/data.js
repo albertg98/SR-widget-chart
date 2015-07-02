@@ -52,12 +52,7 @@ function getANDplot (ticker, from, to) {
 	return new Promise(function(res, rej){
 		$('#ind-cnt').html('');
 		$('.ticker-input').css({opacity: 0});
-		// $('.loading').css({width:'100%',opacity:1});
-		$('.loading').css({
-			'width'   : '100%',
-			'opacity' : 1,
-			'height'  : '100%'
-		});
+		srloader.start();
 		getData(ticker,from,to).then(function(data){
 			getANDplot.chart.init(data.data, {
 				background: "white",
@@ -79,7 +74,7 @@ function getANDplot (ticker, from, to) {
 				}
 			}).next(function () {
 				$('#ticker').val(data.ticker + '/' + (data.name?data.name:data.ticker));
-				$('.loading').css({width:'0%',opacity:0});
+				srloader.stop();
 				$('.ticker-input').css({opacity: 0});
 				return data.ticker;
 			}).next(function(ticker){
@@ -93,16 +88,16 @@ function getANDplot (ticker, from, to) {
 				});
 			});
 		},function(reason){
+			srloader.stop();
+			$('.ticker-input').css({opacity: 0});
+			console.warn(reason);
 			if(reason[1]&& (reason[1] === "error" || reason[1] === "timeout"))	{
 				FAIL('<i class="glyphicon glyphicon-flash"></i> Bad Internet connection, please check with your provider.');
 			}	else	if(reason === "No Data Available")	{
 				FAIL('<i class="glyphicon glyphicon-flag"></i> We are sorry, we do not have this price-data yet.');
 			}	else	{
 				FAIL("Failed to get ticker due to `" + reason + "`");
-				console.log(reason);
 			}
-			$('.loading').css({width:'0%',opacity:0});
-			$('.ticker-input').css({opacity: 0});
 		}).then(function(){
 			var hl = getANDplot.chart.highlow();
 			indList.forEach(function(val){
