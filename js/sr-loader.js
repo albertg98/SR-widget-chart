@@ -17,9 +17,9 @@ function SRLoader (cnt, gimg, bimg) {
 			'opacity' : 1,
 			'height'  : '100%'
 		});
-		$('.loading').css({background:"rgba(58, 111, 150, 0.7)"});
-		$('.loading span').html(txt);
-		$('.loading .spinner').css({
+		$(cnt).css({background:"rgba(58, 111, 150, 0.7)"});
+		$(cnt + ' span').html(txt);
+		$(cnt + '.spinner').css({
 			'background-image':gimg,
 			'animation':'rotateplane 3s infinite ease-in-out'
 		});
@@ -44,9 +44,9 @@ function SRLoader (cnt, gimg, bimg) {
 	 */
 	this.error = function(txt){
 		txt = txt || "Failed to connect, please make sure you have a good internet connection.";
-		$('.loading').css({background:"rgba(238, 115, 115, 0.7)"});
-		$('.loading span').html(txt);
-		$('.loading .spinner').css({'background-image':bimg,'animation':'none'});
+		$(cnt).css({background:"rgba(238, 115, 115, 0.7)"});
+		$(cnt + 'span').html(txt);
+		$(cnt + '.spinner').css({'background-image':bimg,'animation':'none'});
 	}
 }
 
