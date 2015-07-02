@@ -68,3 +68,32 @@
     .crosshair .axisannotation path {
         fill: #DDDDDD;
     }
+
+    .supstance path {
+            stroke: blue;
+            stroke-width: 0.8;
+            stroke-dasharray: 2, 2;
+        }
+
+        .mouseover .supstance path {
+            stroke-width: 1.5;
+        }
+
+        .axisannotation path {
+            fill: blue;
+        }
+
+        .axisannotation text {
+            fill: #fff;
+        }
+
+        .dragging .supstance path {
+            stroke: darkblue;
+        }
+
+        .interaction path {
+            pointer-events: all;
+            cursor: ns-resize;
+            stroke: blue;
+            stroke-width: 1;
+        }

@@ -5,13 +5,15 @@ $(document).ready(function () {
 		todayBtn: "linked",
 		orientation: "top auto",
 		todayHighlight: true
-	}).find('#from-date').datepicker('update', new Date(getANDplot.from)).element
-	.on("changeDate", function(data) {
+	}).find('#from-date')
+	.datepicker('update', new Date(getANDplot.from))
+	.element.on("changeDate", function(data) {
 		getANDplot.from = data.date.getTime();
 		getANDplot();
 	})
-	.parent().find('#to-date').datepicker('update', new Date(getANDplot.to)).element
-	.on("changeDate", function(data) {
+	.parent().find('#to-date')
+	.datepicker('update', new Date(getANDplot.to))
+	.element.on("changeDate", function(data) {
 		getANDplot.to = data.date.getTime();
 		getANDplot();
 	});

@@ -6,7 +6,6 @@
  * @return {Promise}        
  */
 function getData (ticker, from, to) {
-	console.log(from, to)
 	return new Promise(function (res, rej) {
 		if(!getData[ticker + '|' + from + '->' + to])	{
 			SR.AppData.v1.direct.GET(ticker, 'pricedata',{from: from,to:to}).then(function (data) {
@@ -100,9 +99,28 @@ function getANDplot (ticker, from, to) {
 			$('.loading').css({width:'0%',opacity:0});
 			$('.ticker-input').css({opacity: 0});
 		}).then(function(){
+			var hl = getANDplot.chart.highlow();
 			indList.forEach(function(val){
 				addInd.apply(window, val.split('-'));
 			});
+			for(var sup in supstances)	{
+				getANDplot.chart.supstances.add(sup,[supstances[sup]*(hl[1]-hl[0])+hl[0]]).refresh();
+			}
+			getANDplot.chart.supstances.ondrag = function(val, id){
+				supstances[id] = (val-hl[0])/(hl[1]-hl[0]);
+				appmemory.save('supstances', supstances).then(function(){},function(fail){
+					console.warm('failed to save `ondrag-supstances`', fail);
+				});
+			};
+			getANDplot.chart.crosshair.ondbclick = function(x, y){
+				addSup((Number(y.replace(/\$/g,""))-hl[0])/(hl[1]-hl[0])).refresh();
+			}
+			getANDplot.chart.supstances.ondbclick = function(val){
+				delete supstances[val.id];
+				appmemory.save('supstances', supstances).then(function(){
+					getANDplot.chart.supstances.del(val.id).refresh();
+				})
+			}
 			res();
 		});
 	});
@@ -111,20 +129,13 @@ function getANDplot (ticker, from, to) {
 getANDplot.type = 'candlestick';
 getANDplot.from = "2012-01-01";
 getANDplot.to = "2014-01-01";
-/**
- * Add an indicator
- * @param {Strin} type   
- * @param {Number} period 
- * @param {String} color  
- * @param {String} price  
- */
-function addInd (type, period, color, price)	{
-	type = type || 'sma';
-	period = Number(period) || 15;
-	color = color || getRandomColor();
-	var id = type + '-' + period + '-' + color + '-' + price;
-	inputPush(type, period, price, color);
-	indList = Object.keys(getANDplot.chart.indicators.add(id, [type, color, period]).refresh().get());
-	appmemory.save('indlist', indList).then(function(){});
-	return indList;
+
+function addSup(sup, id)	{
+	id = id || Math.random().toString(36).substr(2,3);
+	var hl = getANDplot.chart.highlow();
+	if(sup < 1 && sup > -1) {sup = Math.abs(sup*(hl[1]-hl[0])+hl[0])}
+	supstances[id] = (getANDplot.chart.supstances.add(id, [sup]).refresh().get(id).value-hl[0])/(hl[1]-hl[0]);
+	appmemory.save('supstances',supstances).then(function(){},
+		function(fail){ console.warn('failed to updated `appmemory::supstances`')});
+	return getANDplot.chart;
 }

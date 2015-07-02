@@ -5,10 +5,15 @@ var appmemory = new SR.AppMemory(SR.AppID, SR.UserID);
 		indlist: [
 			'sma-15-#63F806-close',
 			'ema-15-#E01F1F-close'
-		]
+		],
+		supstances: {
+			"gjs": 0.25,
+			"ggf": 0.50,
+			"add": 0.75
+		}
 	});
 /*Global variables*/
-var indList;
+var indList, supstances;
 /**
  * Creates Inputs for indicators
  * @param  {String} type   
@@ -33,4 +38,20 @@ function inputPush (type, period, price, color)	{
 		$('#ind-cnt').append(html);
 }
 
-
+/**
+ * Add an indicator
+ * @param {Strin} type   
+ * @param {Number} period 
+ * @param {String} color  
+ * @param {String} price  
+ */
+function addInd (type, period, color, price)	{
+	type = type || 'sma';
+	period = Number(period) || 15;
+	color = color || getRandomColor();
+	var id = type + '-' + period + '-' + color + '-' + price;
+	inputPush(type, period, price, color);
+	indList = Object.keys(getANDplot.chart.indicators.add(id, [type, color, period]).refresh().get());
+	appmemory.save('indlist', indList).then(function(){});
+	return indList;
+}

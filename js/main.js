@@ -28,19 +28,22 @@ $(document).ready(function () {
 		});
 	});
 	/*Load first plot*/
-	appmemory.load('indlist').then(function(indlist){
+	appmemory.load('indlist').then(function(indlist) {
 		appmemory.load('ticker').then(function (ticker) {
-			indList = indlist;
-			getANDplot.chart = new techan.Chart('#chart', 
-				function(){
-					return	{
-						height: 0.9*window.innerHeight,
-						width: 0.99*window.innerWidth
+			appmemory.load('supstances').then(function(sups) {
+				indList 	= indlist;
+				supstances 	= sups;
+				getANDplot.chart = new techan.Chart('#chart', 
+					function(){
+						return	{
+							height: 0.9*window.innerHeight,
+							width: 0.99*window.innerWidth
+						}
 					}
-				}
-			);
-			getANDplot(ticker).then(function(){
-				$('.loading').css({width:'0%',opacity:0})
+				);
+				getANDplot(ticker).then(function(){
+					$('.loading').css({width:'0%',opacity:0})
+				});
 			});
 		});
 	});

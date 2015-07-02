@@ -62,7 +62,8 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		/*Set*/
 		this.scales = new Chart.Scales(this);
 		this.axes = new Chart.Axes(this);
-		this.annotations = new Chart.Annotations(this);
+		this.crosshair = new Chart.Crosshair(this);
+		this.supstances = new Chart.Supstances(this);
 		this.dataMappers = new Chart.DataMappers(this);
 		this.indicators = new Chart.Indicators(this);
 		this.plots = new Chart.Plots(this);
@@ -96,7 +97,8 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			/*Styling*/
 			this.scales.del('*').release('pre').release('post').init();
 			this.axes.del('*').release('pre').release('post').init((opt&&opt.xlab)?opt.xlab:toptions.xlab);
-			this.annotations.del('*').release('pre').release('post').init((opt&&opt.crosshair && opt.crosshair.col)?opt.crosshair.col:null);
+			this.crosshair.del('*').release('pre').release('post').init((opt&&opt.crosshair && opt.crosshair.col)?opt.crosshair.col:null);
+			this.supstances.del('*').release('pre').release('post').init((opt&&opt.crosshair && opt.crosshair.col)?opt.crosshair.col:null);
 			this.indicators.del('*').release('pre').release('post').init();
 			this.plots.del('*').release('pre').release('post').init((opt&&opt.plots)?opt.plots:{});
 			/*data*/
@@ -143,9 +145,10 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			data = ndata || data;
 			me.scales.refresh();
 			me.axes.refresh();
-			me.annotations.refresh();
+			me.crosshair.refresh();
 			me.dataMappers.refresh();
 			me.indicators.refresh();
+			me.supstances.refresh();
 			/*title*/
 			if(opt&&opt.title)	{
 				if(opt.title.constructor === String)	{
@@ -192,6 +195,10 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					.text(title);
 			};
 		}
+
+		this.highlow = function()	{
+			return Chart.highlow(this.data());
+		}
 	}
 //-----------------------------------------
 //	Error Handlers
@@ -224,6 +231,9 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			}
 		}));
 		return [min, max];
+	}
+	Chart.hlmean = function(data)	{
+		return Chart.highlow(data).reduce(function(pv, cv) { return pv + cv; }, 0)/2;
 	}
 //-----------------------------------------
 //	Yotzer - Process Maintainer
@@ -291,6 +301,13 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					return cnt;
 				}
 			}
+			this.getA = function(id){
+				if(id){
+					return cnt[id]
+				}	else	{
+					return Object.keys(cnt).map(function(name){ return cnt[name]});
+				}
+			}
 			/**
 			 * Delete a process
 			 * @param  {String} id 
@@ -316,7 +333,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 	}
 
 	Chart.Yo = Yotzer;
-
 //-----------------------------------------
 //	Scales - Scale Maker 
 //-----------------------------------------
@@ -348,7 +364,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					}
 				]
 			],
-			['x2', [
+			['x-bottom', [
 					'financetime',
 					function(){
 						return [0,dim().dim[0]];
@@ -362,7 +378,14 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					}
 				]
 			],
-			['y2', [
+			['y-%', [
+					'linear',
+					function(){
+						return [dim().dim[1],0];
+					}
+				]
+			],
+			['y-bottom', [
 					'linear',
 					function(){
 						return [dim().height2,0];
@@ -374,7 +397,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		});
 		this.add('y-volume', ['linear',
 			function(){
-				return [scales('y')(0), scales('y')(0.3)];
+				return [scales('y')(0), scales('y')(0.4)];
 			}
 		]);
 		/*Register post-process function*/
@@ -393,7 +416,6 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		return this
 	};
 	Chart.Scales = Scales;
-
 //-----------------------------------------
 //	Axes -  Axis Maker
 //-----------------------------------------
@@ -405,11 +427,8 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 	 * @return {Axis}                              
 	 */
 	var Axes = Chart.Yo(function(ctx, scale, orient, opt){
-		if(scale.constructor === Function)	{
-			scale = scale();
-		}	
 		var t = d3.svg.axis()
-					.scale(scale)
+					.scale(ctx.scales.get(scale))
 					.orient(orient);
 		if(opt)	{
 			opt.forEach(function(fcn){
@@ -421,29 +440,22 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 
 	Axes.prototype.init = function (xtitle) {
 		/*Set Defaults*/
-		var me 		= this,
-			scales 	= this.chart.scales.get;
-
+		var me 		= this;
 		[
 			['xAxis',
-				[function(){
-					return scales('x');
-				}, "bottom"]
+				['x', "bottom"]
 			],
 			['xAxis2',
-				[function(){
-					return scales('x2');
-				}, "bottom"]
+				['x-bottom', "bottom"]
+			],
+			['%Axis',
+				['y-%', "right"]
 			],
 			['yAxis',
-				[function(){
-					return scales('y');
-				}, "left"]
+				['y', "left"]
 			],
 			['yAxis2',
-				[function(){
-					return scales('y2');
-				}, "left", [
+				['y-bottom', "left", [
 					function(t)	{
 						return t.ticks(0);
 					}
@@ -473,17 +485,16 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 				.attr("class", "x axis")
 				.attr("transform", "translate(0," + dim.height2 + ")");
 			context.append("g")
-					.attr("class", "y axis")
-					.call(axis('yAxis2'));
+				.attr("class", "y axis")
+				.call(axis('yAxis2'));
 		});
 		return this;
 	};
 	Chart.Axes = Axes	
-
 //-----------------------------------------
-//	Annotation
+//	Crosshair
 //-----------------------------------------
-	var Annotations = Chart.Yo(function(chart, axis, format, opt){	
+	var Crosshair = Chart.Yo(function(chart, axis, format, opt){	
 		var t = techan.plot.axisannotation()
 					.axis(chart.axes.get(axis))
 					.format(format);
@@ -493,7 +504,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		return t;
 	})
 
-	Annotations.prototype.init = function (color) {
+	Crosshair.prototype.init = function (color) {
 		var me 	 = this,
 			dim  = this.chart.getDim();
 			[
@@ -501,7 +512,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 				]],
 				['x-time',[
 						'xAxis', function (time) {
-							return new Date(time).toLocaleString();
+							return new Date(time).toDateString();
 						}, function(t)	{
 							return t.width(65).translate([0, dim.dim[1]]);
 						}
@@ -513,9 +524,9 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		this.register('post', function(chart){
 			var scale 		= chart.scales.get,
 				annotations = {x:[],y:[]};
-				for(anno in chart.annotations.get()){ 
+				for(anno in chart.crosshair.get()){ 
 					if(annotations[anno[0]]){
-						annotations[anno[0]].push(chart.annotations.get(anno));
+						annotations[anno[0]].push(chart.crosshair.get(anno));
 					}	else	{
 						console.warn('Did use annotation `'+anno+'` because it involved an invalid name');
 					}
@@ -524,11 +535,21 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 				.xScale(scale('x'))
 				.yScale(scale('y'))
 				.xAnnotation(annotations.x)
-				.yAnnotation(annotations.y);
+				.yAnnotation(annotations.y),
 			
-			chart.svg().focus.append('g')
+				cross = chart.svg().focus.append('g')
 				.attr("class", "crosshair")
-				.call(t);
+				.call(t)
+				.on("click", function(d){
+					if(chart.crosshair.onclick) {
+						chart.crosshair.onclick($('.axisannotation.x text').html(), $('.axisannotation.y text').html())
+					}
+				})
+				.on("dblclick", function(d){
+					if(chart.crosshair.ondbclick) {
+						chart.crosshair.ondbclick($('.axisannotation.x text').html(), $('.axisannotation.y text').html())
+					}
+				});
 		});
 		this.register('post', function(){
 			d3.selectAll('.crosshair path.wire').style("stroke", color);
@@ -536,7 +557,96 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		return this;
 	};
 
-	Chart.Annotations = Annotations
+	Chart.Crosshair = Crosshair
+//-----------------------------------------
+//	Supstance
+//-----------------------------------------
+	var Supstances = Chart.Yo(function(chart, value){
+		if(value.constructor === Function)	{
+			value = value();
+		}	
+		Chart.check(value, Number, "value", "chart.supstance");
+		var mima = Chart.highlow(chart.data(), 'date');
+		return { id: chart.id, start: new Date(mima[0]), end: new Date(mima[1]), value: value};
+	});
+
+	Supstances.prototype.init = function (color) {
+		var me 	 = this,
+			dim  = this.chart.getDim(),
+			data = this.chart.data;
+		this.register('pre', function(chart){
+			chart.svg().focus.selectAll('g.supstances').remove();
+			chart.svg().focus.selectAll('text.supstances-coords').remove();
+		});
+		this.register('post', function(chart){
+			/*Annotations*/
+			var axes = chart.axes.get;
+			var ohlc = techan.plot.axisannotation()
+				.axis(axes('yAxis'))
+				.format(d3.format(',.2fs'));
+
+			var percent = techan.plot.axisannotation()
+				.axis(axes('%Axis'))
+				.format(d3.format('+.1%'));
+			/*Supstance-render*/
+			var scales = chart.scales.get,
+				supstance = techan.plot.supstance()
+				.xScale(scales('x'))
+				.yScale(scales('y'))
+				.annotation([ohlc, percent])
+				.on("mouseenter", function (d) {
+					valueText.style("display", "inline");
+					valueText.text("Value: " + d3.format(',.2fs')(d.value));
+				})
+				.on("mouseout", function () {
+					valueText.style("display", "none");
+				})
+				.on("drag", function (d) {
+					valueText.text("Value: " + d3.format(',.2fs')(d.value));
+					if(chart.supstances.ondrag){ chart.supstances.ondrag(d.value, d.id); };
+				});
+			/*SVG*/
+			var valueText = chart.svg().svg.append('text')
+				.style("text-anchor", "end")
+				.attr("class", "supstances-coords")
+				.attr("x", dim.dim[0] - 5)
+				.attr("y", 15);
+
+			chart.svg().focus.append('g')
+				.attr('class','supstances')
+				.datum(chart.supstances.getA())
+				.call(supstance).call(supstance.drag)
+				.on("click", function(d){
+					var num = Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""));
+					if(chart.supstances.onclick) {
+						chart.supstances.onclick(d.reduce(function(d,b){
+							if(Math.abs(d.value - num)>Math.abs(b.value - num)) {
+										return b
+									}	else	{
+										return d
+									};
+								})
+							)
+					}
+				})
+				.on("dblclick", function(d){
+					var num = Number($('.supstances-coords')[$('.supstances-coords').length - 1].textContent.replace('Value: ',""));
+					if(chart.supstances.ondbclick) {
+						chart.supstances.ondbclick(d.reduce(function(d,b){
+							if(Math.abs(d.value - num)>Math.abs(b.value - num)) {
+										return b
+									}	else	{
+										return d
+									};
+								})
+							)
+					}
+				});
+		});
+		return this;
+	};
+
+	Chart.Supstances = Supstances
 
 //-----------------------------------------
 //	DataMapper
@@ -557,14 +667,14 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		[
 			['x-main',
 				[
-					['x', 'x2'],function(){
+					['x', 'x-bottom'],function(){
 						return data.map(function(v){return new Date(v.date)});
 					}	
 				]
 			],
 			['y-main',
 				[
-					['y', 'y2'],function(){
+					['y', 'y-bottom'],function(){
 						return Chart.highlow(data);
 					}
 				]
@@ -607,7 +717,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			axis  		= chart.axes.get,
 			brush		= brush,
 			data 		= chart.data(),
-			zoomable 	= [scale('x').zoomable(), scale('x2').zoomable()];
+			zoomable 	= [scale('x').zoomable(), scale('x-bottom').zoomable()];
 
 			/*Zoom*/
 			brush.x(zoomable[1]);
@@ -672,7 +782,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		[
 			['volume', ['volume', ['x', 'y-volume'], "focus", (opt.volume && opt.volume.col)?opt.volume.col:null, this.chart.data]],
 			['main', [(opt.main && opt.main.style)?opt.main.style:'close', ['x','y'], "focus", (opt.main && opt.main.col)?opt.main.col:null, this.chart.data]],
-			['bottom', ['close', ['x2', 'y2'], "context", (opt.bottom && opt.bottom.col)?opt.bottom.col:null, this.chart.data]]
+			['bottom', ['close', ['x-bottom', 'y-bottom'], "context", (opt.bottom && opt.bottom.col)?opt.bottom.col:null, this.chart.data]]
 		].forEach(function(item){
 			me.add.apply(this, item);
 		});
