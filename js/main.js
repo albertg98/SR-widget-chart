@@ -33,7 +33,7 @@ $(document).ready(function () {
 				}
 			});
 		},function(reason){
-			console.log(reason);
+			console.warn(reason);
 			if(reason[1] === 'timeout' && cnt < 2)	{
 				typeaheadLoad(cnt+1);
 			}	else	{
