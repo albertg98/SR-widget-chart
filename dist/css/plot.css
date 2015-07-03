@@ -1,0 +1,98 @@
+ body {
+        font: 10px sans-serif;
+    }
+
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+
+    path.candle {
+        stroke: #000000;
+    }
+
+    path.candle.body {
+        stroke-width: 0;
+    }
+
+    path.candle.up {
+        fill: #00AA00;
+        stroke: #00AA00;
+    }
+
+    path.candle.down {
+        fill: #FF0000;
+        stroke: #FF0000;
+    }
+
+    path.ohlc {
+        stroke: #000000;
+        stroke-width: 1;
+    }
+
+    path.ohlc.up {
+        stroke: #00AA00;
+    }
+
+    path.ohlc.down {
+        stroke: #FF0000;
+    }
+
+    path.volume {
+        fill: #DFD4E3;
+    }
+
+    path.line {
+        fill: none;
+        stroke: #541B79;
+        stroke-width: 1;
+    }
+
+    .extent {
+        stroke: #fff;
+        fill-opacity: .125;
+        shape-rendering: crispEdges;
+    }
+
+    .crosshair {
+        cursor: crosshair;
+    }
+
+    .crosshair path.wire {
+        stroke: #DDDDDD;
+        stroke-dasharray: 1, 1;
+    }
+
+    .crosshair .axisannotation path {
+        fill: #DDDDDD;
+    }
+
+    .supstance path {
+            stroke: blue;
+            stroke-width: 0.8;
+            stroke-dasharray: 2, 2;
+        }
+
+        .mouseover .supstance path {
+            stroke-width: 1.5;
+        }
+
+        .axisannotation path {
+            fill: blue;
+        }
+        .axisannotation text {
+            fill: #fff;
+        }
+
+        .dragging .supstance path {
+            stroke: darkblue;
+        }
+
+        .interaction path {
+            pointer-events: all;
+            cursor: ns-resize;
+            stroke: blue;
+            stroke-width: 1;
+        }

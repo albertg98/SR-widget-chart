@@ -1,0 +1,52 @@
+.input-group-btn:last-child > .btn, .input-group-btn:last-child > .btn-group {
+	padding-bottom: 15%;
+	margin-bottom: -5%;
+}
+.tt-menu {
+	padding: 8px 0px;
+	background-color: #FFF;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	border-radius: 8px;
+	box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+}
+.tt-suggestion {
+	padding: 3px 20px;
+	line-height: 24px;
+}
+.twitter-typeahead {
+	width: 100%;
+	margin-top: 1%;
+}
+.popup-msg {
+	position: absolute;
+	top: 0px;
+	left: 60%;
+	right: 0%;
+	z-index: 9001;
+	text-align: center;
+	transition: all, 0.75s, ease-in-out;
+	margin: 15% 0;
+	width: 50%;
+	opacity: 0;
+}
+
+.ticker-input {
+	position: absolute !important;
+	left: 0px;
+	right: 0px;
+	transition: all, 0.25s, ease-in-out;
+	opacity: 0;
+}
+/*Foundation Bug fix*/
+.prefix-round.row.collapse .prefix {
+  border-radius: 0;
+  -webkit-border-bottom-left-radius: 1000px;
+  -webkit-border-top-left-radius: 1000px;
+  border-bottom-left-radius: 1000px;
+  border-top-left-radius: 1000px; }
+.postfix-round.row.collapse .postfix {
+  border-radius: 0;
+  -webkit-border-bottom-right-radius: 1000px;
+  -webkit-border-top-right-radius: 1000px;
+  border-bottom-right-radius: 1000px;
+  border-top-right-radius: 1000px; }

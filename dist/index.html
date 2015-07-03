@@ -1,0 +1,168 @@
+<html>
+<head>
+	<title>Stockrender-Chart-App</title>
+	<meta charset="utf-8">
+	<!-- CSS -->
+		<!-- Bower -->
+			<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
+			<link rel="stylesheet" type="text/css" href="bower_components/fuelux/dist/css/fuelux.css">
+			<link rel="stylesheet" type="text/css" href="bower_components/mjolnic-bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
+			<link rel="stylesheet" type="text/css" href="bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.css">
+			<link rel="stylesheet" type="text/css" href="bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.css">
+		<!-- Bower -->
+		<link rel="stylesheet" type="text/css" href="css/main.css">
+		<link rel="stylesheet" type="text/css" href="css/plot.css">
+		<link rel="stylesheet" type="text/css" href="css/loading-anim.css">
+	<!-- CSS -->
+	<!-- Framework -->
+		<script src="vendors/stockrender-apprender-launch.js"></script>
+	<!-- Framework -->
+	<!-- Bower -->
+		<script type="text/javascript" src="bower_components/d3/d3.js"></script>
+		<script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+		<script type="text/javascript" src="bower_components/fuelux/dist/js/fuelux.js"></script>
+		<script type="text/javascript" src="bower_components/techan/dist/techan.js"></script>
+		<script type="text/javascript" src="bower_components/async/lib/async.js"></script>
+		<script type="text/javascript" src="bower_components/typeahead.js/dist/typeahead.bundle.js"></script>
+		<script type="text/javascript" src="bower_components/mjolnic-bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js"></script>
+		<script type="text/javascript" src="bower_components/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+	<!-- Bower -->
+	<!-- JS -->
+		<script type="text/javascript" src="js/sr-loader.js"></script>
+		<script type="text/javascript" src="js/memory.js"></script>
+		<script type="text/javascript" src="js/alert.js"></script>
+		<script type="text/javascript" src="js/randomcolor.js"></script>
+		<script type="text/javascript" src="js/data.js"></script>
+		<script type="text/javascript" src="js/chart.js"></script>
+		<script type="text/javascript" src="js/ctrl.js"></script>
+		<script type="text/javascript" src="js/main.js"></script>
+	<!-- JS -->
+</head>
+<body>
+	<div class="overhead loading">
+		<div class="spinner"></div>
+		<span> Loading...</span>
+	</div>
+	<div class="col-lg-6 col-lg-offset-3 col-xs-6 col-xs-offset-3 col-sm-6 col-sm-offset-3 col-md-6 col-md-offset-3">
+		<div class="row">
+			<div class="input-group ticker-input">
+				<input type="text" class="form-control" placeholder="Ticker/Stock Name" id="ticker">
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" id="ticker-change"><i class="glyphicon glyphicon-play"></i></button>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#settings">
+					<i class="glyphicon glyphicon-cog"></i>
+					</button>
+				</span>
+			</div>
+		</div>
+		<div class="row">
+			<div class="input-group col-sm-6 col-md-6 col-lg-6">
+				<div class="alert alert-success popup-msg" role="alert">
+					<a href="#" class="alert-link"></a>
+				</div>
+				<div class="alert alert-danger popup-msg" role="alert">
+					<a href="#" class="alert-link"></a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="chart">
+	</div>
+	<div class="modal fade" id="settings" tabindex="-1" role="dialog" aria-labelledby="settingsLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h2 class="modal-title" id="settingsLabel"><i class="glyphicon glyphicon-tasks"></i> Chart Settings</h2>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<h3>&nbsp;Settings</h3>
+						<hr>
+						<div class="row">
+							<div class="control-group col-xs-4 col-xs-offset-1 col-sm-4 col-sm-offset-1 col-md-4 col-md-offset-1 col-lg-4 col-lg-offset-1">
+								<label class="control-label" for="selectmaintype">Select Main Type</label>
+								<div class="controls">
+									<div class="btn-group selectlist" data-resize="auto" data-initialize="selectlist" id="select-main-type">
+										<button class="btn btn-default dropdown-toggle " data-toggle="dropdown" type="button">
+											<span class="selected-label">Select Main Type</span>
+											<span class="caret"></span>
+											<span class="sr-only">Toggle Dropdown</span>
+										</button>
+										<ul class="dropdown-menu" role="menu">
+											<li data-value="candlestick"><a href="#">Candlestick</a></li>
+											<li data-value="ohlc"><a href="#">OHLC</a></li>
+											<li data-value="close"><a href="#">Line</a></li>
+										</ul>
+										<input class="hidden hidden-field" name="selectmaintype" readonly="readonly" aria-hidden="true" type="text">
+									</div>
+								</div>
+							</div>
+							<div class="control-group col-xs-6 col-sm-6 col-md-6 col-lg-6">
+								<label class="control-label" for="selectbasic">Select Dates</label>
+								<div class="control-group">
+									<div class="input-daterange input-group" id="datepicker">
+										<span class="input-group-addon"> from</span>
+										<input type="text" class="input-sm form-control" id="from-date"/>
+										<span class="input-group-addon">to</span>
+										<input type="text" class="input-sm form-control" id="to-date"/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<h3>&nbsp;Indicator Add</h3>
+						<hr>
+						<div class="row">
+							<div class="control-group col-xs-4 col-xs-offset-1 col-sm-4 col-sm-offset-1 col-md-4 col-md-offset-1 col-lg-4 col-lg-offset-1">
+								<label class="control-label" for="selectbasic">Select Type</label>
+								<div class="controls">
+									<div class="btn-group selectlist" data-resize="auto" data-initialize="selectlist" id="select-type">
+										<button class="btn btn-default dropdown-toggle " data-toggle="dropdown" type="button">
+											<span class="selected-label">Select Type</span>
+											<span class="caret"></span>
+											<span class="sr-only">Toggle Dropdown</span>
+										</button>
+										<ul class="dropdown-menu" role="menu">
+											<li data-value="sma"><a href="#"><strong>SMA</strong> - Simple Moving Average</a></li>
+											<li data-value="ema"><a href="#"><strong>EMA</strong> - Exponential Moving Average</a></li>
+										</ul>
+										<input class="hidden hidden-field" name="selectbasic" readonly="readonly" aria-hidden="true" type="text">
+									</div>
+								</div>
+							</div>
+							<div class="control-group col-xs-2 col-xs-offset-1 col-sm-2 col-sm-offset-1 col-md-2 col-md-offset-1 col-lg-2 col-lg-offset-1">
+									<label class="control-label" for="Period">Period</label>
+									<div class="controls">
+										<div>
+											<input class="form-control" value="15" id="periods" type="number">
+											<span class="help-block">Number of periods</span>
+										</div>
+									</div>
+							</div>
+							<div class="input-group col-xs-1 col-sm-1 col-md-1 col-lg-1">
+								<label class="control-label" for="Period">Color</label>
+								<div class="ind-color controls">
+									<input type="text" value="" class="form-control" />
+								<span class="input-group-addon"><i></i></span>
+								</div>
+							</div>
+							<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2 ">
+								<div class="controls">
+									<button id="addind" name="singlebutton" class="btn btn-primary">Add</button>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<h3>&nbsp;Existing Indicators</h3>
+						<hr>
+						<div style="overflow-y:scroll;height:25%" id="ind-cnt"></div>
+					</div>	
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
