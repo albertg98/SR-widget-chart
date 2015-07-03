@@ -546,7 +546,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					if(annotations[anno[0]]){
 						annotations[anno[0]].push(chart.crosshair.get(anno));
 					}	else	{
-						console.warn('Did use annotation `'+anno+'` because it involved an invalid name');
+						console.warn('Did not use annotation `'+anno+'` because it involved an invalid name');
 					}
 				}
 			var t = techan.plot.crosshair()
@@ -672,7 +672,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			dates = dates();
 		}
 		Chart.check(dates, Array, "from-to (milliseconds)", "chart.supstance");
-		console.log(values, dates);
+		// console.log(values, dates);
 		return { id: chart.id, 
 			start: {
 				date: new Date(dates[0]), 
