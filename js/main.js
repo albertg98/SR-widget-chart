@@ -1,9 +1,7 @@
 var chart;
 $(document).ready(function () {
-	/*Set as local if needed*/
-	if(window.location.hostname === "localhost" && window.location.port === "8080"){
-		SR.LOCAL = true;
-	};
+	// SR.LOCAL= true;//Set to load from local apo
+	// SR.timeout = 20000;//Set the timeout to 20s
 	/*Loader*/
 	srloader.start();
 	/*Load typehead*/
