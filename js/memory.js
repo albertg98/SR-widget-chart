@@ -3,13 +3,8 @@ var appmemory = new SR.AppMemory(SR.AppID, SR.UserID);
 	appmemory.initMemory({
 		ticker: 'A',
 		indlist: [
-			'sma-15-#63F806-close',
-			'ema-15-#E01F1F-close'
 		],
 		supstances: {
-			"gjs": 0.25,
-			"ggf": 0.50,
-			"add": 0.75
 		}
 	});
 /*Global variables*/

@@ -36,6 +36,9 @@ function SRLoader (cnt, gimg, bimg) {
 			'opacity' : 0,
 			'height'  : '0%',
 		});
+		setTimeout(function () {
+			$(cnt).css({'display':'none'});
+		},1000);
 		return this;
 	}
 	/**

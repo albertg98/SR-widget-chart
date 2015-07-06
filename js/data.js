@@ -130,8 +130,8 @@ function getANDplot (ticker, from, to) {
 }
 /*Set defaults*/
 getANDplot.type = 'candlestick';
-getANDplot.from = "2012-01-01";
-getANDplot.to = "2014-01-01";
+getANDplot.to = Date.now();
+getANDplot.from = getANDplot.to - 365 * 86400000;
 
 function addSup(sup, id)	{
 	id = id || Math.random().toString(36).substr(2,3);
