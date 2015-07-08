@@ -14,7 +14,6 @@ $(document).ready(function () {
 				queryTokenizer: Bloodhound.tokenizers.nonword,
 				datumTokenizer: Bloodhound.tokenizers.nonword
 			});
-			window.tickers = tickers;
 			$('#ticker').typeahead({
 				hint: true,
 				highlight: true
