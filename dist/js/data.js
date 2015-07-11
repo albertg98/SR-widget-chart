@@ -58,7 +58,7 @@ function getANDplot (ticker, from, to) {
 				background: "white",
 				stroke: null,
 				title: data.name, 
-				xlab: 'Price ($)', 
+				xlab: '', 
 				style: getANDplot.type,
 				crosshair: {col: 'black'},
 				plots: {

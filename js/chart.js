@@ -26,15 +26,17 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 				d = dim;
 			}
 			margins = [
-				{top: 20, right: 20, bottom: 100, left: 50}
+				{top: 20, right: 0, bottom: 0.15*d.height, left: 40}
 			];
-			width = d.width  - margins[0].left - margins[0].right;
+			width = 1.005 * (d.width  - margins[0].left - margins[0].right);
 			height = d.height  - margins[0].top - margins[0].bottom; 
 			margins.push({
 				top: height+margins[0].top, 
-				right: 20, bottom: 20, left: 50
+				right: 0, 
+				bottom: 0, 
+				left: 40
 			});
-			height2 = d.height - margins[1].top - margins[1].bottom;
+			height2 = 1.25* (d.height - margins[1].top - margins[1].bottom);
 		};
 		/**
 		 * Get dimenstions
@@ -133,7 +135,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 			setDim();
 			svg = d3.select(cntid).append("svg")
 				.attr("width", width + margins[0].left + margins[0].right)
-				.attr("height", height + margins[0].top + margins[0].bottom)
+				.attr("height", 1.06 * (height + margins[0].top + 1.2*margins[0].bottom) )
 				.style("background",(opt&&opt.background)?opt.background:null),
 			focus = svg.append("g")
 				.attr("class", "focus")
@@ -173,7 +175,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		 * @param  {String} title   
 		 * @param  {Object} options
 		 */
-		var toptions = {text:false, options:{}, xlab:"Price ($)"};
+		var toptions = {text:false, options:{}, xlab:""};
 		this.title = function (title, options) {
 			options = options || toptions.options;
 			title = title || toptions.text;
@@ -449,9 +451,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 					.scale(ctx.scales.get(scale))
 					.orient(orient);
 		if(opt)	{
-			opt.forEach(function(fcn){
-				t = fcn(t);
-			})
+			t = opt(t);
 		}
 		return t;
 	})
@@ -461,10 +461,15 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		var me 		= this;
 		[
 			['xAxis',
-				['x', "bottom"]
+				['x', "bottom", function(t){
+					// return t.tickFormat(function fDate(a) { a=(a.constructor === Date)?a:((a.constructor === Number || a.constructor === String)?new Date(a):null );  return ((a.getMonth() === 0 && a.getDate() === 1)|| (a.getMonth() == 11 && a.getDate() === 31))?(d3.time.format("%Y")(a)):(d3.time.format("%b")(a)) })
+					return t;
+				}]
 			],
 			['xAxis2',
-				['x-bottom', "bottom"]
+				['x-bottom', "bottom", function(t){
+					return t.tickFormat("")
+				}]
 			],
 			['%Axis',
 				['y-%', "right"]
@@ -473,11 +478,11 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 				['y', "left"]
 			],
 			['yAxis2',
-				['y-bottom', "left", [
+				['y-bottom', "left", 
 					function(t)	{
 						return t.ticks(0);
 					}
-				]]
+				]
 			]
 		].forEach(function(item){
 			me.add.apply(this, item);
@@ -523,8 +528,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 	})
 
 	Crosshair.prototype.init = function (color) {
-		var me 	 = this,
-			dim  = this.chart.getDim();
+		var me 	 = this;
 			[
 				['y-ohlc',['yAxis', d3.format('$,.2fs')
 				]],
@@ -532,6 +536,7 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 						'xAxis', function (time) {
 							return new Date(time).toDateString();
 						}, function(t)	{
+							dim  = me.chart.getDim();
 							return t.width(65).translate([0, dim.dim[1]]);
 						}
 					]
@@ -765,7 +770,14 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		[
 			['x-main',
 				[
-					['x', 'x-bottom'],function(){
+					['x'],function(){
+						return data.map(function(v){return new Date(v.date)});
+					}	
+				]
+			],
+			['x-bottom',
+				[
+					['x-bottom'],function(){
 						return data.map(function(v){return new Date(v.date)});
 					}	
 				]
@@ -854,9 +866,9 @@ for (var scale in d3.scale) { techan.scale[scale] = d3.scale[scale]; }
 		Chart.check(type, String, "type", "chart.plot.add");
 		/*Create plot*/
 		var scale 	= chart.scales.get,
-			t = techan.plot[type]()
-					.xScale(scale(scales[0]))
-					.yScale(scale(scales[1]));
+			t 		= techan.plot[type]()
+						.xScale(scale(scales[0]))
+						.yScale(scale(scales[1]));
 		
 		/*Clear container if it exists*/
 			chart.svg()[loc].select('.' + chart.id + '-' + type).remove();
