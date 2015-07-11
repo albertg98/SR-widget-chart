@@ -1,7 +1,10 @@
  body {
         font: 10px sans-serif;
     }
-
+    .resize rect {
+        visibility: inherit !important;
+          fill: #409cde;
+    }
     .axis path,
     .axis line {
         fill: none;
@@ -51,8 +54,9 @@
     }
 
     .extent {
-        stroke: #fff;
+        stroke: #409cde;
         fill-opacity: .125;
+        fill: #409cde;
         shape-rendering: crispEdges;
     }
 
